@@ -17,7 +17,6 @@ import LoginPage from './pages/login';
 import AdminDashboard from './pages/admin-dashboard';
 import ContentManagement from './pages/content-management';
 import MedicationSearch from './pages/medication-search';
-import HomePage from './pages/home';
 import MedicationDetails from './pages/medication-details';
 import NotFound from "pages/NotFound";
 import ForgotPasswordPage from './pages/forgot-password';
@@ -56,15 +55,7 @@ const Routes = () => {
             
             {/* Protected Clinical Routes */}
             <Route
-              path="/home"
-              element={
-                <AuthenticationGate requiredRole="clinical">
-                  <HomePage />
-                </AuthenticationGate>
-              }
-            />
-            <Route
-              path="/medication-search"
+              path="/medication-search" 
               element={
                 <AuthenticationGate requiredRole="clinical">
                   <MedicationSearch />
@@ -72,13 +63,14 @@ const Routes = () => {
               }
             />
             <Route
-              path="/medication-details/:id"
+              path="/medication-details/:id" 
               element={
                 <AuthenticationGate requiredRole="clinical">
                   <MedicationDetails />
                 </AuthenticationGate>
               }
             />
+            
             {/* Fallback */}
             <Route path="*" element={<NotFound />} />
           </RouterRoutes>

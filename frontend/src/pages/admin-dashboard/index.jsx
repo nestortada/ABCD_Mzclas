@@ -202,7 +202,7 @@ const AdminDashboard = () => {
   }, []);
 
   const handleTestClinicalView = () => {
-    navigate('/home');
+    navigate('/medication-search');
   };
 
   if (isLoading) {

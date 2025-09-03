@@ -111,7 +111,7 @@ const LoginForm = ({ currentLanguage, onLanguageChange }) => {
 
       // Navigate based on role
       if (formData?.role === 'clinico') {
-        navigate('/home');
+        navigate('/medication-search');
       } else {
         navigate('/admin-dashboard');
       }

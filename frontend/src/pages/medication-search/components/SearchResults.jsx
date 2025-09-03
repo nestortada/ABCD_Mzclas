@@ -1,5 +1,3 @@
-import { useFavorites } from "../../../utils/favorites";
-import { incrementSearchCount } from "../../../utils/searchMetrics";
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
@@ -7,19 +5,24 @@ import Button from '../../../components/ui/Button';
 
 const SearchResults = ({ results, searchQuery, selectedCategory, isLoading }) => {
   const navigate = useNavigate();
-  const { favorites, toggleFavorite } = useFavorites();
 
   const handleMedicationClick = (medication) => {
-    incrementSearchCount(medication.id);
-    navigate(`/medication-details?id=${medication.id}`);
+    navigate('/medication-details', { state: { medication } });
   };
 
   const addToFavorites = (medicationId, e) => {
     e?.stopPropagation();
-    toggleFavorite(medicationId);
+    const favorites = JSON.parse(localStorage.getItem('clinicalDict_favorites') || '[]');
+    const updated = favorites?.includes(medicationId) 
+      ? favorites?.filter(id => id !== medicationId)
+      : [...favorites, medicationId];
+    localStorage.setItem('clinicalDict_favorites', JSON.stringify(updated));
   };
 
-  const isFavorite = (medicationId) => favorites.includes(medicationId);
+  const isFavorite = (medicationId) => {
+    const favorites = JSON.parse(localStorage.getItem('clinicalDict_favorites') || '[]');
+    return favorites?.includes(medicationId);
+  };
 
   if (isLoading) {
     return (
