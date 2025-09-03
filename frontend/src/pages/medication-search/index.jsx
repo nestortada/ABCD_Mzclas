@@ -53,26 +53,67 @@ const MedicationSearch = () => {
   }, [searchQuery, medications]);
 
 
+  const extractKeywords = (text) => {
+    // Lista de palabras a ignorar (stop words en español)
+    const stopWords = new Set([
+      'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas',
+      'de', 'del', 'y', 'o', 'para', 'por', 'con', 'sin',
+      'sobre', 'entre', 'detrás', 'después', 'antes',
+      'durante', 'hacia', 'hasta', 'desde', 'como',
+      'pero', 'sino', 'porque', 'pues', 'que', 'si',
+      'bien', 'mal', 'así', 'mientras', 'tras',
+      'yo', 'tú', 'él', 'ella', 'nosotros', 'vosotros', 'ellos', 'ellas',
+      'me', 'te', 'se', 'nos', 'os', 'mi', 'tu', 'su',
+      'este', 'esta', 'estos', 'estas', 'ese', 'esa', 'esos', 'esas',
+      'necesito', 'quiero', 'busco', 'dosis', 'cantidad', 'dar'
+    ]);
+
+    // Eliminar puntuación y dividir en palabras
+    const words = text
+      .toLowerCase()
+      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')  // Eliminar puntuación
+      .split(/\s+/);  // Dividir por espacios
+
+    // Filtrar stop words y palabras vacías
+    return words.filter(word => word.length > 2 && !stopWords.has(word));
+  };
+
   const performSearch = async (query = '') => {
     try {
       setIsLoading(true);
       await new Promise(resolve => setTimeout(resolve, 300));
-      const q = query.toLowerCase();
       
-      if (!q) {
+      if (!query.trim()) {
         setSearchResults([]);
         return;
       }
+
+      // Extraer palabras clave de la consulta
+      const keywords = extractKeywords(query);
       
-      const results = medications.filter(med =>
-        med.name.toLowerCase().includes(q) ||
-        med.presentation.toLowerCase().includes(q) ||
-        med.dosage.toLowerCase().includes(q) ||
-        med.administration.toLowerCase().includes(q) ||
-        med.concentration.toLowerCase().includes(q) ||
-        med.dilution.toLowerCase().includes(q) ||
-        med.observations.toLowerCase().includes(q)
-      );
+      // Si no hay palabras clave válidas después de filtrar, mostrar todos los resultados
+      if (keywords.length === 0) {
+        setSearchResults(medications);
+        return;
+      }
+
+      // Buscar medicamentos que coincidan con cualquiera de las palabras clave
+      const results = medications.filter(med => {
+        const searchFields = [
+          med.name.toLowerCase(),
+          med.presentation.toLowerCase(),
+          med.dosage.toLowerCase(),
+          med.administration.toLowerCase(),
+          med.concentration.toLowerCase(),
+          med.dilution.toLowerCase(),
+          med.observations.toLowerCase()
+        ];
+
+        // Un medicamento coincide si alguna de sus palabras clave está en algún campo
+        return keywords.some(keyword => 
+          searchFields.some(field => field.includes(keyword))
+        );
+      });
       
       // Update search results
       setSearchResults(results);

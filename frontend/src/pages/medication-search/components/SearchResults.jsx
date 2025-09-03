@@ -1,10 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
+import { getCurrentLocation } from '../../../utils/geoLocation';
 
 const SearchResults = ({ results, searchQuery, isLoading, hasMedications }) => {
   const navigate = useNavigate();
+  const [locationError, setLocationError] = useState(null);
+  const [isLocationVerified, setIsLocationVerified] = useState(false);
+  const [isCheckingLocation, setIsCheckingLocation] = useState(true);
+
+  useEffect(() => {
+    verifyLocation();
+  }, []);
+
+  const verifyLocation = async () => {
+    try {
+      setIsCheckingLocation(true);
+      await getCurrentLocation();
+      setIsLocationVerified(true);
+      setLocationError(null);
+    } catch (error) {
+      setLocationError(error.message);
+      setIsLocationVerified(false);
+    } finally {
+      setIsCheckingLocation(false);
+    }
+  };
 
   const handleMedicationClick = (medication) => {
     navigate(`/medication-details?id=${medication?.id}`);
@@ -23,6 +45,53 @@ const SearchResults = ({ results, searchQuery, isLoading, hasMedications }) => {
     const favorites = JSON.parse(localStorage.getItem('clinicalDict_favorites') || '[]');
     return favorites?.includes(medicationId);
   };
+
+  if (isCheckingLocation) {
+    return (
+      <div className="w-full max-w-2xl mx-auto text-center py-12">
+        <div className="animate-spin mx-auto mb-4">
+          <Icon name="Loader2" className="w-12 h-12 text-primary" />
+        </div>
+        <h3 className="text-lg font-medium text-slate-600">Verificando ubicación...</h3>
+      </div>
+    );
+  }
+
+  if (locationError) {
+    return (
+      <div className="w-full max-w-2xl mx-auto text-center py-12">
+        <Icon name="MapPin" size={48} className="text-red-500 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-slate-800 mb-2">Error de ubicación</h3>
+        <p className="text-slate-600 mb-4">{locationError}</p>
+        <Button
+          variant="secondary"
+          onClick={verifyLocation}
+          className="inline-flex items-center"
+        >
+          <Icon name="RefreshCw" size={16} className="mr-2" />
+          Reintentar verificación
+        </Button>
+      </div>
+    );
+  }
+
+  if (!isLocationVerified) {
+    return (
+      <div className="w-full max-w-2xl mx-auto text-center py-12">
+        <Icon name="MapOff" size={48} className="text-slate-300 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-slate-800 mb-2">Ubicación no verificada</h3>
+        <p className="text-slate-600 mb-4">Este servicio solo está disponible en Colombia</p>
+        <Button
+          variant="primary"
+          onClick={verifyLocation}
+          className="inline-flex items-center"
+        >
+          <Icon name="MapPin" size={16} className="mr-2" />
+          Verificar ubicación
+        </Button>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
