@@ -5,7 +5,7 @@ import CategoryShortcuts from './components/CategoryShortcuts';
 import VoiceSearchButton from './components/VoiceSearchButton';
 import SearchResults from './components/SearchResults';
 import FilterSidebar from './components/FilterSidebar';
-import RecentSearches from './components/RecentSearches';
+import Button from '../../components/ui/Button';
 
 const MedicationSearch = () => {
   const location = useLocation();
@@ -146,6 +146,30 @@ const MedicationSearch = () => {
     }
   }, [searchQuery, selectedCategory, filters]);
 
+  useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    const handleMouseMove = (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 100;
+      const y = (e.clientY / window.innerHeight - 0.5) * 100;
+      document.documentElement.style.setProperty('--px', x);
+      document.documentElement.style.setProperty('--py', y);
+    };
+
+    const handleScroll = () => {
+      document.documentElement.style.setProperty('--scroll', window.scrollY);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   const extractKeywordsFromText = (text) => {
     // Remove common words and extract potential medication keywords
     const commonWords = ['necesito', 'para', 'administrar', 'a', 'mi', 'paciente', 'el', 'la', 'los', 'las', 'un', 'una', 'de', 'del', 'que', 'con', 'por', 'en', 'es', 'y', 'o', 'pero', 'se', 'le', 'me', 'te', 'nos'];
@@ -236,11 +260,11 @@ const MedicationSearch = () => {
     }
   };
 
-  const handleSearchFocus = () => {
-    if (!searchQuery?.trim()) {
-      setShowRecentSearches(true);
-    }
-  };
+    const handleSearchFocus = () => {
+      if (!searchQuery?.trim()) {
+        setShowRecentSearches(true);
+      }
+    };
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
@@ -248,47 +272,53 @@ const MedicationSearch = () => {
     setShowRecentSearches(false);
   };
 
-  const handleVoiceSearch = () => {
+  const onStartVoice = () => {
     if (!isVoiceSupported) {
       alert('La búsqueda por voz no está disponible en este navegador');
       return;
     }
 
     setIsVoiceActive(true);
-    
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    
+
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = 'es-ES';
-    
+
     recognition.onstart = () => {
       setIsVoiceActive(true);
     };
-    
+
     recognition.onresult = (event) => {
       const transcript = event?.results?.[0]?.[0]?.transcript;
       setSearchQuery(transcript);
       setSelectedCategory('');
       setShowRecentSearches(false);
-      
+
       // Save to recent searches
       const recentSearches = JSON.parse(localStorage.getItem('clinicalDict_recentSearches') || '[]');
       const updated = [transcript, ...recentSearches?.filter(s => s !== transcript)]?.slice(0, 5);
       localStorage.setItem('clinicalDict_recentSearches', JSON.stringify(updated));
     };
-    
+
     recognition.onerror = (event) => {
       console.error('Speech recognition error:', event?.error);
       setIsVoiceActive(false);
     };
-    
+
     recognition.onend = () => {
       setIsVoiceActive(false);
     };
-    
+
     recognition?.start();
+  };
+
+  const handleHome = () => {
+    setSearchQuery('');
+    setSelectedCategory('');
+    setShowRecentSearches(false);
   };
 
   const handleSearchSelect = (searchTerm) => {
@@ -298,29 +328,35 @@ const MedicationSearch = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <ClinicalSearchHeader 
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        onSearchFocus={handleSearchFocus}
-        onVoiceSearch={handleVoiceSearch}
-        showRecentSearches={showRecentSearches}
-        onRecentSearchSelect={handleSearchSelect}
-        onCloseRecentSearches={() => setShowRecentSearches(false)}
-      />
+      <div className="min-h-screen hex-bg">
+        <ClinicalSearchHeader
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          onSearchFocus={handleSearchFocus}
+          showRecentSearches={showRecentSearches}
+          onRecentSearchSelect={handleSearchSelect}
+          onCloseRecentSearches={() => setShowRecentSearches(false)}
+          onHome={handleHome}
+        />
       
       <main className="container mx-auto px-4 py-8 space-y-8">
+        {!searchQuery && !selectedCategory && !showRecentSearches && (
+          <section className="text-center space-y-4">
+            <h1 className="text-3xl font-bold text-white">ClinicalDictionary — Sedoanalgésicos</h1>
+            <p className="text-white/80">Guía rápida de sedoanalgésicos</p>
+            <div className="flex justify-center gap-4">
+              <Button onClick={() => {}}>Buscar medicamentos</Button>
+              <Button variant="outline" onClick={() => {}}>Abrir calculadoras</Button>
+            </div>
+          </section>
+        )}
+
         {/* Category Shortcuts */}
         {!searchQuery && !selectedCategory && !showRecentSearches && (
           <CategoryShortcuts
             onCategorySelect={handleCategorySelect}
             selectedCategory={selectedCategory}
           />
-        )}
-
-        {/* Recent Searches / Quick Access - Only show when not searching */}
-        {!searchQuery && !selectedCategory && !showRecentSearches && (
-          <RecentSearches onSearchSelect={handleSearchSelect} />
         )}
 
         {/* Search Results */}
@@ -339,9 +375,9 @@ const MedicationSearch = () => {
       </main>
 
       {/* Voice Search Button */}
-      <VoiceSearchButton
-        isActive={isVoiceActive}
-        onActivate={handleVoiceSearch}
+        <VoiceSearchButton
+          isActive={isVoiceActive}
+        onStartVoice={onStartVoice}
         isSupported={isVoiceSupported}
       />
 
