@@ -10,64 +10,64 @@ const AdminSidebar = ({ isCollapsed = false, onToggleCollapse }) => {
   const { logout } = useNavigation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const navigationItems = [
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      icon: 'LayoutDashboard',
-      path: '/admin-dashboard',
-      description: 'System overview and metrics'
-    },
-    {
-      id: 'content',
-      label: 'Content Management',
-      icon: 'FileText',
-      path: '/content-management',
-      description: 'Manage medication database'
-    },
-    {
-      id: 'users',
-      label: 'User Management',
-      icon: 'Users',
-      path: '/user-management',
-      description: 'Manage clinical staff access'
-    },
-    {
-      id: 'analytics',
-      label: 'Analytics',
-      icon: 'BarChart3',
-      path: '/analytics',
-      description: 'Usage and performance metrics'
-    },
-    {
-      id: 'settings',
-      label: 'System Settings',
-      icon: 'Settings',
-      path: '/settings',
-      description: 'Configure system parameters'
-    }
-  ];
+    const navigationItems = [
+      {
+        id: 'dashboard',
+        label: 'Panel',
+        icon: 'LayoutDashboard',
+        path: '/admin-dashboard',
+        description: 'Resumen del sistema y métricas'
+      },
+      {
+        id: 'content',
+        label: 'Gestión de Contenido',
+        icon: 'FileText',
+        path: '/content-management',
+        description: 'Administrar base de datos de medicamentos'
+      },
+      {
+        id: 'users',
+        label: 'Gestión de Usuarios',
+        icon: 'Users',
+        path: '/user-management',
+        description: 'Gestionar acceso del personal clínico'
+      },
+      {
+        id: 'analytics',
+        label: 'Analíticas',
+        icon: 'BarChart3',
+        path: '/analytics',
+        description: 'Métricas de uso y rendimiento'
+      },
+      {
+        id: 'settings',
+        label: 'Configuración del Sistema',
+        icon: 'Settings',
+        path: '/settings',
+        description: 'Configurar parámetros del sistema'
+      }
+    ];
 
-  const quickActions = [
-    {
-      id: 'add-medication',
-      label: 'Add Medication',
-      icon: 'Plus',
-      action: () => navigate('/content-management?action=add')
-    },
-    {
-      id: 'bulk-import',
-      label: 'Bulk Import',
-      icon: 'Upload',
-      action: () => navigate('/content-management?action=import')
-    },
-    {
-      id: 'export-data',
-      label: 'Export Data',
-      icon: 'Download',
-      action: () => navigate('/content-management?action=export')
-    }
-  ];
+    const quickActions = [
+      {
+        id: 'add-medication',
+        label: 'Agregar Medicamento',
+        icon: 'Plus',
+        action: () => navigate('/content-management?action=add')
+      },
+      {
+        id: 'bulk-import',
+        label: 'Importación Masiva',
+        icon: 'Upload',
+        action: () => navigate('/content-management?action=import')
+      },
+      {
+        id: 'export-data',
+        label: 'Exportar Datos',
+        icon: 'Download',
+        action: () => navigate('/content-management?action=export')
+      }
+    ];
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -90,10 +90,10 @@ const AdminSidebar = ({ isCollapsed = false, onToggleCollapse }) => {
             <Icon name="Shield" size={24} color="white" />
           </div>
           {!isCollapsed && (
-            <div>
-              <h1 className="text-lg font-semibold text-foreground">Admin Panel</h1>
-              <p className="text-xs text-muted-foreground">ClinicalDictionary</p>
-            </div>
+              <div>
+                <h1 className="text-lg font-semibold text-foreground">Panel de Administración</h1>
+                <p className="text-xs text-muted-foreground">Diccionario Clínico</p>
+              </div>
           )}
         </div>
         
@@ -143,7 +143,7 @@ const AdminSidebar = ({ isCollapsed = false, onToggleCollapse }) => {
         {!isCollapsed && (
           <div className="pt-6">
             <h3 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Quick Actions
+              Acciones Rápidas
             </h3>
             <div className="space-y-1">
               {quickActions?.map((action) => (
@@ -171,7 +171,7 @@ const AdminSidebar = ({ isCollapsed = false, onToggleCollapse }) => {
             className={`w-full justify-start ${isCollapsed ? 'px-2' : 'px-3'}`}
           >
             <Icon name="HelpCircle" size={18} className={isCollapsed ? '' : 'mr-3'} />
-            {!isCollapsed && 'Help & Support'}
+            {!isCollapsed && 'Ayuda y Soporte'}
           </Button>
           
           <Button
@@ -182,7 +182,7 @@ const AdminSidebar = ({ isCollapsed = false, onToggleCollapse }) => {
             }`}
           >
             <Icon name="LogOut" size={18} className={isCollapsed ? '' : 'mr-3'} />
-            {!isCollapsed && 'Sign Out'}
+            {!isCollapsed && 'Cerrar sesión'}
           </Button>
         </div>
         
@@ -193,7 +193,7 @@ const AdminSidebar = ({ isCollapsed = false, onToggleCollapse }) => {
                 <Icon name="User" size={16} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">Admin User</p>
+                <p className="text-sm font-medium text-foreground truncate">Usuario Administrador</p>
                 <p className="text-xs text-muted-foreground truncate">admin@clinicaldict.com</p>
               </div>
             </div>
