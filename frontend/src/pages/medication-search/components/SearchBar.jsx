@@ -65,7 +65,7 @@ const SearchBar = ({ searchQuery, onSearchChange, onVoiceSearch, isVoiceActive }
         <Input
           ref={inputRef}
           type="search"
-          placeholder="Buscar medicamentos, protocolos, diluciones..."
+          placeholder="Buscar sedoanalgésicos, dosis, diluciones…"
           value={searchQuery}
           onChange={handleInputChange}
           onKeyPress={handleKeyPress}
