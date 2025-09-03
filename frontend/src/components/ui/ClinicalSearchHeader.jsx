@@ -56,7 +56,7 @@ const ClinicalSearchHeader = ({
     } else if (onSearchChange) {
       onSearchChange('');
     }
-    navigate('/medication-search');
+    navigate('/home');
     window.location.reload();
   };
 
@@ -92,7 +92,7 @@ const ClinicalSearchHeader = ({
           <div className="relative">
             <Input
               type="search"
-              placeholder="Buscar sedoanalgésicos, dosis, protocolos..."
+              placeholder="Buscar sedoanalgésicos, dosis, diluciones…"
               value={searchQuery}
               onChange={(e) => onSearchChange && onSearchChange(e?.target?.value)}
               onFocus={() => onSearchFocus && onSearchFocus()}

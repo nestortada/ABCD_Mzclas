@@ -20,7 +20,7 @@ const LoginPage = () => {
   useEffect(() => {
     if (isAuthenticated) {
       if (userRole === 'clinical') {
-        navigate('/medication-search');
+        navigate('/home');
       } else {
         navigate('/admin-dashboard');
       }
@@ -59,7 +59,7 @@ const LoginPage = () => {
 
       // Navigate based on role
       if (formData?.role === 'clinical') {
-        navigate('/medication-search');
+        navigate('/home');
       } else {
         navigate('/admin-dashboard');
       }
