@@ -5,7 +5,7 @@ import CategoryShortcuts from './components/CategoryShortcuts';
 import VoiceSearchButton from './components/VoiceSearchButton';
 import SearchResults from './components/SearchResults';
 import FilterSidebar from './components/FilterSidebar';
-import RecentSearches from './components/RecentSearches';
+import Button from '../../components/ui/Button';
 
 const MedicationSearch = () => {
   const location = useLocation();
@@ -146,6 +146,30 @@ const MedicationSearch = () => {
     }
   }, [searchQuery, selectedCategory, filters]);
 
+  useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    const handleMouseMove = (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 100;
+      const y = (e.clientY / window.innerHeight - 0.5) * 100;
+      document.documentElement.style.setProperty('--px', x);
+      document.documentElement.style.setProperty('--py', y);
+    };
+
+    const handleScroll = () => {
+      document.documentElement.style.setProperty('--scroll', window.scrollY);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   const extractKeywordsFromText = (text) => {
     // Remove common words and extract potential medication keywords
     const commonWords = ['necesito', 'para', 'administrar', 'a', 'mi', 'paciente', 'el', 'la', 'los', 'las', 'un', 'una', 'de', 'del', 'que', 'con', 'por', 'en', 'es', 'y', 'o', 'pero', 'se', 'le', 'me', 'te', 'nos'];
@@ -248,7 +272,7 @@ const MedicationSearch = () => {
     setShowRecentSearches(false);
   };
 
-  const handleVoiceSearch = () => {
+  const onStartVoice = () => {
     if (!isVoiceSupported) {
       alert('La búsqueda por voz no está disponible en este navegador');
       return;
@@ -316,17 +340,23 @@ const MedicationSearch = () => {
         />
       
       <main className="container mx-auto px-4 py-8 space-y-8">
+        {!searchQuery && !selectedCategory && !showRecentSearches && (
+          <section className="text-center space-y-4">
+            <h1 className="text-3xl font-bold text-white">ClinicalDictionary — Sedoanalgésicos</h1>
+            <p className="text-white/80">Guía rápida de sedoanalgésicos</p>
+            <div className="flex justify-center gap-4">
+              <Button onClick={() => {}}>Buscar medicamentos</Button>
+              <Button variant="outline" onClick={() => {}}>Abrir calculadoras</Button>
+            </div>
+          </section>
+        )}
+
         {/* Category Shortcuts */}
         {!searchQuery && !selectedCategory && !showRecentSearches && (
           <CategoryShortcuts
             onCategorySelect={handleCategorySelect}
             selectedCategory={selectedCategory}
           />
-        )}
-
-        {/* Recent Searches / Quick Access - Only show when not searching */}
-        {!searchQuery && !selectedCategory && !showRecentSearches && (
-          <RecentSearches onSearchSelect={handleSearchSelect} />
         )}
 
         {/* Search Results */}
@@ -347,9 +377,9 @@ const MedicationSearch = () => {
       {/* Voice Search Button */}
         <VoiceSearchButton
           isActive={isVoiceActive}
-          onActivate={handleVoiceSearch}
-          isSupported={isVoiceSupported}
-        />
+        onStartVoice={onStartVoice}
+        isSupported={isVoiceSupported}
+      />
 
       {/* Filter Sidebar */}
       <FilterSidebar
