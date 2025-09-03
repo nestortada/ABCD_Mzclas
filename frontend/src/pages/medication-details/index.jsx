@@ -3,10 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import ClinicalSearchHeader from '../../components/ui/ClinicalSearchHeader';
 import { useNavigation } from '../../components/ui/RoleBasedNavigation';
 import MedicationHeader from './components/MedicationHeader';
-import SafetyInformation from './components/SafetyInformation';
-import DosageConcentration from './components/DosageConcentration';
-import WarningsIncompatibilities from './components/WarningsIncompatibilities';
-import ClinicalObservations from './components/ClinicalObservations';
+import MedicationDetailTab from './components/MedicationDetailTab';
 import QuickActions from './components/QuickActions';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
@@ -17,7 +14,7 @@ import medicationsData from '../../../FARMACOTECA_REORGANIZADA.json';
 const MedicationDetails = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { isAuthenticated, userRole } = useNavigation();
+  const { isAuthenticated } = useNavigation();
   const [medication, setMedication] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,16 +34,19 @@ const MedicationDetails = () => {
       id: medicationId,
       name: rawData.Medicamento,
       presentation: rawData.Presentacion,
-      dosage: rawData["Dosis de seguridad"],
-      administration: rawData["Via / Forma de administracion"],
+      dosage: rawData['Dosis de seguridad'],
+      administration: rawData['Via / Forma de administracion'],
       concentration: rawData.Concentracion,
       dilution: rawData.Dilucion,
-      incompatibilities: rawData.Incompatibilidades,
+      incompatibilities: rawData.Incompatibilidades
+        ? rawData.Incompatibilidades.split(',').map(item => item.trim())
+        : [],
       observations: rawData.Observaciones,
-      stability: rawData["Estabilidad de la dilucion"],
-      lightProtection: rawData["Proteccion de la luz"],
-      administrationTime: rawData["Tiempo de administracion"],
-      dosageUnit: rawData["Unidad de dosificacion"]
+      stability: rawData['Estabilidad de la dilucion'],
+      lightProtection: rawData['Proteccion de la luz'],
+      administrationTime: rawData['Tiempo de administracion'],
+      dosageUnit: rawData['Unidad de dosificacion'],
+      warnings: rawData.Advertencias || null,
     } : null;
     if (data) {
       setMedication(data);
@@ -158,10 +158,7 @@ const MedicationDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-4 lg:p-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            <SafetyInformation medication={medication} />
-            <DosageConcentration medication={medication} />
-            <WarningsIncompatibilities medication={medication} />
-            <ClinicalObservations medication={medication} />
+            <MedicationDetailTab medication={medication} />
           </div>
 
           {/* Sidebar */}
