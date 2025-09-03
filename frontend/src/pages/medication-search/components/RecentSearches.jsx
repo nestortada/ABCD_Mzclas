@@ -8,7 +8,7 @@ const RecentSearches = ({ onSearchSelect }) => {
 
   useEffect(() => {
     const savedSearches = localStorage.getItem('clinicalDict_recentSearches');
-    const savedFavorites = localStorage.getItem('clinicalDict_favorites');
+    const savedFavorites = localStorage.getItem('sedo_favoritos_v1');
     
     if (savedSearches) {
       setRecentSearches(JSON.parse(savedSearches));

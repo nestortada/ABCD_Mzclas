@@ -12,18 +12,21 @@ import QuickActions from './components/QuickActions';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
 
+import { useFavorites } from "../../utils/favorites";
+import { incrementSearchCount } from "../../utils/searchMetrics";
 
 
 const MedicationDetails = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { isAuthenticated, userRole } = useNavigation();
+  const { favorites, toggleFavorite } = useFavorites();
+  const medicationId = searchParams?.get('id') || '1';
+  useEffect(() => { incrementSearchCount(medicationId); }, [medicationId]);
   const [medication, setMedication] = useState(null);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-
-  const medicationId = searchParams?.get('id') || '1';
+  const isFavorite = favorites.includes(medicationId);
 
   // Mock medication data
   const mockMedications = {
@@ -222,10 +225,6 @@ const MedicationDetails = () => {
       if (medicationData) {
         setMedication(medicationData);
         
-        // Check if medication is in favorites
-        const favorites = JSON.parse(localStorage.getItem('clinicalDict_favorites') || '[]');
-        setIsFavorite(favorites?.includes(medicationId));
-        
         // Add to recently viewed
         const recentlyViewed = JSON.parse(localStorage.getItem('clinicalDict_recentlyViewed') || '[]');
         const updated = [medicationId, ...recentlyViewed?.filter(id => id !== medicationId)]?.slice(0, 10);
@@ -235,18 +234,8 @@ const MedicationDetails = () => {
     }, 800);
   }, [medicationId, isAuthenticated, navigate]);
 
-  const handleToggleFavorite = () => {
-    const favorites = JSON.parse(localStorage.getItem('clinicalDict_favorites') || '[]');
-    let updatedFavorites;
-    
-    if (isFavorite) {
-      updatedFavorites = favorites?.filter(id => id !== medicationId);
-    } else {
-      updatedFavorites = [...favorites, medicationId];
-    }
-    
-    localStorage.setItem('clinicalDict_favorites', JSON.stringify(updatedFavorites));
-    setIsFavorite(!isFavorite);
+const handleToggleFavorite = () => {
+    toggleFavorite(medicationId);
   };
 
   const handleShare = () => {
@@ -302,7 +291,7 @@ const MedicationDetails = () => {
             </div>
             <h2 className="text-xl font-semibold text-foreground">Medicamento no encontrado</h2>
             <p className="text-muted-foreground">No se pudo encontrar la información del medicamento solicitado.</p>
-            <Button onClick={() => navigate('/medication-search')}>
+            <Button onClick={() => navigate('/home')}>
               Volver a Búsqueda
             </Button>
           </div>

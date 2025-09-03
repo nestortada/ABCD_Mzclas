@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
 import Input from '../../../components/ui/Input';
-import Button from '../../../components/ui/Button';
 
-const SearchBar = ({ searchQuery, onSearchChange, onVoiceSearch, isVoiceActive }) => {
+const SearchBar = ({ searchQuery, onSearchChange }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [recentSearches, setRecentSearches] = useState([]);
   const inputRef = useRef(null);
@@ -65,30 +64,19 @@ const SearchBar = ({ searchQuery, onSearchChange, onVoiceSearch, isVoiceActive }
         <Input
           ref={inputRef}
           type="search"
-          placeholder="Buscar medicamentos, protocolos, diluciones..."
+          placeholder="Buscar sedoanalgésicos, dosis, diluciones…"
           value={searchQuery}
           onChange={handleInputChange}
           onKeyPress={handleKeyPress}
           onFocus={() => setShowSuggestions(searchQuery?.length > 0)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-          className="pl-12 pr-16 h-14 text-lg bg-white border-2 border-slate-200 rounded-xl focus:border-primary clinical-shadow"
+          className="pl-12 pr-4 h-14 text-lg bg-white border-2 border-slate-200 rounded-xl focus:border-primary clinical-shadow"
         />
-        <Icon 
-          name="Search" 
-          size={24} 
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" 
+        <Icon
+          name="Search"
+          size={24}
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"
         />
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onVoiceSearch}
-          className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 ${
-            isVoiceActive 
-              ? 'text-error bg-error/10 animate-pulse' :'text-slate-400 hover:text-primary hover:bg-primary/10'
-          }`}
-        >
-          <Icon name={isVoiceActive ? "MicOff" : "Mic"} size={20} />
-        </Button>
       </div>
       {/* Search Suggestions */}
       {showSuggestions && (filteredSuggestions?.length > 0 || recentSearches?.length > 0) && (

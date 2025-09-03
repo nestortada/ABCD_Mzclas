@@ -87,7 +87,7 @@ const RelatedMedications = ({ relatedMedications }) => {
       <div className="mt-6 pt-4 border-t border-border">
         <Button
           variant="outline"
-          onClick={() => navigate('/medication-search')}
+          onClick={() => navigate('/home')}
           className="w-full"
         >
           <Icon name="Search" size={18} className="mr-2" />
