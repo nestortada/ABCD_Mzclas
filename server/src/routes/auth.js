@@ -75,30 +75,34 @@ const requestResetLimiter = rateLimit({
 
 router.post('/request-reset', requestResetLimiter, async (req, res) => {
   const parsed = requestResetSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(200).json({ ok: true }); // generic
+  if (!parsed.success) return res.status(400).json({ error: 'Entrada inválida' });
 
   const { email } = parsed.data;
   const user = await User.findOne({ email });
 
-  if (user) {
-    const raw = generateResetToken(32);
-    const hash = sha256Hex(raw);
-    const exp = new Date(Date.now() + 15 * 60 * 1000);
-    user.resetTokenHash = hash;
-    user.resetTokenExp = exp;
-    await user.save();
-
-    const link = `${env.frontendOrigin.replace(/\/$/, '')}/reset?token=${encodeURIComponent(raw)}&email=${encodeURIComponent(email)}`;
-    try {
-      await mail.sendPasswordReset(email, link);
-    } catch (e) {
-      // Do not leak errors; still return generic
-      console.error('Mail error:', e);
-    }
+  // Por seguridad, siempre devolvemos una respuesta exitosa
+  if (!user) {
+    return res.status(200).json({ message: 'Si el correo existe, recibirás un enlace para restablecer tu contraseña.' });
   }
 
-  // Always generic response
-  return res.json({ ok: true });
+  // Si el usuario existe, procedemos con el reseteo
+  const raw = generateResetToken(32);
+  const hash = sha256Hex(raw);
+  const exp = new Date(Date.now() + 15 * 60 * 1000);
+  user.resetTokenHash = hash;
+  user.resetTokenExp = exp;
+  await user.save();
+
+  const link = `${env.frontendOrigin.replace(/\/$/, '')}/reset?token=${encodeURIComponent(raw)}&email=${encodeURIComponent(email)}`;
+  try {
+    await mail.sendPasswordReset(email, link);
+  } catch (e) {
+    // Do not leak errors; still return generic
+    console.error('Mail error:', e);
+  }
+
+  // Respuesta exitosa
+  return res.status(200).json({ message: 'Si el correo existe, recibirás un enlace para restablecer tu contraseña.' });
 });
 
 router.post('/reset', async (req, res) => {

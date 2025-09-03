@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { requestPasswordReset } from '../../lib/api';
@@ -17,18 +17,18 @@ const ForgotPasswordPage = () => {
       setStatus('done');
     } catch (e) {
       setStatus('error');
-      setError(e?.message || 'Ocurrió un error al enviar la solicitud.');
+      setError('OcurriÃ³ un error al enviar la solicitud.');
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
       <div className="w-full max-w-md bg-white rounded-xl shadow p-6 space-y-4">
-        <h1 className="text-xl font-semibold">Recuperar contraseña</h1>
+        <h1 className="text-xl font-semibold">Recuperar contraseÃ±a</h1>
         {status !== 'done' ? (
           <form onSubmit={onSubmit} className="space-y-4">
             <Input
-              label="Correo electrónico"
+              label="Correo electrÃ³nico"
               type="email"
               name="email"
               value={email}
@@ -45,7 +45,7 @@ const ForgotPasswordPage = () => {
         ) : (
           <div className="space-y-2">
             <p>
-              Si el correo existe, recibirás un enlace de restablecimiento.
+              Si el correo existe, recibirÃ¡s un enlace de restablecimiento.
               Revisa tu bandeja de entrada y spam.
             </p>
           </div>
@@ -56,4 +56,5 @@ const ForgotPasswordPage = () => {
 };
 
 export default ForgotPasswordPage;
+
 

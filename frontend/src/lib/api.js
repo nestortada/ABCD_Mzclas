@@ -8,7 +8,13 @@ export const api = axios.create({
 });
 
 export async function requestPasswordReset(email) {
-  await api.post('/api/auth/request-reset', { email });
+  try {
+    const res = await api.post('/api/auth/request-reset', { email });
+    return res.data;
+  } catch (err) {
+    const msg = err?.response?.data?.error || 'No se pudo procesar la solicitud.';
+    throw new Error(msg);
+  }
 }
 
 export async function resetPassword({ email, token, newPassword }) {
