@@ -9,15 +9,14 @@ const ClinicalSearchHeader = ({
   searchQuery = '', 
   onSearchChange, 
   onSearchFocus,
-  onVoiceSearch,
   showRecentSearches,
   onRecentSearchSelect,
-  onCloseRecentSearches
+  onCloseRecentSearches,
+  onHome
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useNavigation();
-  const [isVoiceActive, setIsVoiceActive] = useState(false);
   const [recentSearches, setRecentSearches] = useState([]);
 
   useEffect(() => {
@@ -46,51 +45,19 @@ const ClinicalSearchHeader = ({
     }
   };
 
-  const handleVoiceSearch = () => {
-    setIsVoiceActive(true);
-    
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'es-ES';
-      
-      recognition.onstart = () => {
-        setIsVoiceActive(true);
-      };
-      
-      recognition.onresult = (event) => {
-        const transcript = event?.results?.[0]?.[0]?.transcript;
-        handleSearch(transcript);
-        if (onVoiceSearch) {
-          onVoiceSearch(transcript);
-        }
-      };
-      
-      recognition.onerror = () => {
-        setIsVoiceActive(false);
-      };
-      
-      recognition.onend = () => {
-        setIsVoiceActive(false);
-      };
-      
-      recognition?.start();
-    } else {
-      setIsVoiceActive(false);
-      alert('Voice search is not supported in this browser');
-    }
-  };
-
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
   const handleHomeClick = () => {
+    if (onHome) {
+      onHome();
+    } else if (onSearchChange) {
+      onSearchChange('');
+    }
     navigate('/medication-search');
+    window.location.reload();
   };
 
   return (
@@ -112,11 +79,11 @@ const ClinicalSearchHeader = ({
         {/* Logo */}
         <div className="flex items-center space-x-3">
           <div className="flex items-center justify-center w-10 h-10 bg-primary rounded-lg">
-            <Icon name="Stethoscope" size={24} color="white" />
+            <Icon name="Syringe" size={24} color="white" />
           </div>
           <div className="hidden sm:block">
-            <h1 className="text-xl font-semibold text-foreground">ClinicalDictionary</h1>
-            <p className="text-xs text-muted-foreground">Medical Reference</p>
+            <h1 className="text-xl font-semibold text-foreground">SedoAnalgesia</h1>
+            <p className="text-xs text-muted-foreground">Guía de sedoanalgésicos</p>
           </div>
         </div>
 
@@ -125,28 +92,18 @@ const ClinicalSearchHeader = ({
           <div className="relative">
             <Input
               type="search"
-              placeholder="Search medications, dosages, interactions..."
+              placeholder="Buscar sedoanalgésicos, dosis, protocolos..."
               value={searchQuery}
               onChange={(e) => onSearchChange && onSearchChange(e?.target?.value)}
               onFocus={() => onSearchFocus && onSearchFocus()}
               onKeyPress={(e) => e?.key === 'Enter' && handleSearch(e?.target?.value)}
-              className="pl-10 pr-12"
+              className="pl-10"
             />
-            <Icon 
-              name="Search" 
-              size={20} 
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" 
+            <Icon
+              name="Search"
+              size={20}
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
             />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleVoiceSearch}
-              className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${
-                isVoiceActive ? 'text-error animate-pulse' : 'text-muted-foreground hover:text-primary'
-              }`}
-            >
-              <Icon name={isVoiceActive ? "MicOff" : "Mic"} size={18} />
-            </Button>
           </div>
           
           {/* Recent Searches Dropdown */}

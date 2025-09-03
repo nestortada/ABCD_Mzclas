@@ -236,11 +236,11 @@ const MedicationSearch = () => {
     }
   };
 
-  const handleSearchFocus = () => {
-    if (!searchQuery?.trim()) {
-      setShowRecentSearches(true);
-    }
-  };
+    const handleSearchFocus = () => {
+      if (!searchQuery?.trim()) {
+        setShowRecentSearches(true);
+      }
+    };
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
@@ -255,40 +255,46 @@ const MedicationSearch = () => {
     }
 
     setIsVoiceActive(true);
-    
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    
+
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = 'es-ES';
-    
+
     recognition.onstart = () => {
       setIsVoiceActive(true);
     };
-    
+
     recognition.onresult = (event) => {
       const transcript = event?.results?.[0]?.[0]?.transcript;
       setSearchQuery(transcript);
       setSelectedCategory('');
       setShowRecentSearches(false);
-      
+
       // Save to recent searches
       const recentSearches = JSON.parse(localStorage.getItem('clinicalDict_recentSearches') || '[]');
       const updated = [transcript, ...recentSearches?.filter(s => s !== transcript)]?.slice(0, 5);
       localStorage.setItem('clinicalDict_recentSearches', JSON.stringify(updated));
     };
-    
+
     recognition.onerror = (event) => {
       console.error('Speech recognition error:', event?.error);
       setIsVoiceActive(false);
     };
-    
+
     recognition.onend = () => {
       setIsVoiceActive(false);
     };
-    
+
     recognition?.start();
+  };
+
+  const handleHome = () => {
+    setSearchQuery('');
+    setSelectedCategory('');
+    setShowRecentSearches(false);
   };
 
   const handleSearchSelect = (searchTerm) => {
@@ -298,16 +304,16 @@ const MedicationSearch = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <ClinicalSearchHeader 
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        onSearchFocus={handleSearchFocus}
-        onVoiceSearch={handleVoiceSearch}
-        showRecentSearches={showRecentSearches}
-        onRecentSearchSelect={handleSearchSelect}
-        onCloseRecentSearches={() => setShowRecentSearches(false)}
-      />
+      <div className="min-h-screen hex-bg">
+        <ClinicalSearchHeader
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          onSearchFocus={handleSearchFocus}
+          showRecentSearches={showRecentSearches}
+          onRecentSearchSelect={handleSearchSelect}
+          onCloseRecentSearches={() => setShowRecentSearches(false)}
+          onHome={handleHome}
+        />
       
       <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Category Shortcuts */}
@@ -339,11 +345,11 @@ const MedicationSearch = () => {
       </main>
 
       {/* Voice Search Button */}
-      <VoiceSearchButton
-        isActive={isVoiceActive}
-        onActivate={handleVoiceSearch}
-        isSupported={isVoiceSupported}
-      />
+        <VoiceSearchButton
+          isActive={isVoiceActive}
+          onActivate={handleVoiceSearch}
+          isSupported={isVoiceSupported}
+        />
 
       {/* Filter Sidebar */}
       <FilterSidebar
