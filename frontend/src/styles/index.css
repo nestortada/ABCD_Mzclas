@@ -12,11 +12,21 @@ body {
 }
 
 .hex-bg {
-  background-color: #f8fafc;
+  position: relative;
+  min-height: 100vh;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.hex-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background-image:
-    linear-gradient(30deg, rgba(59,130,246,0.15) 12%, transparent 12.5%, transparent 87%, rgba(59,130,246,0.15) 87.5%, rgba(59,130,246,0.15)),
-    linear-gradient(150deg, rgba(59,130,246,0.15) 12%, transparent 12.5%, transparent 87%, rgba(59,130,246,0.15) 87.5%, rgba(59,130,246,0.15)),
-    linear-gradient(90deg, rgba(59,130,246,0.15) 2%, transparent 2.5%, transparent 97%, rgba(59,130,246,0.15) 97.5%, rgba(59,130,246,0.15));
-  background-size: 60px 104px;
-  background-position: 0 0, 0 0, 0 0;
+    radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15), transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.15), transparent 50%),
+    repeating-linear-gradient(60deg, rgba(59, 130, 246, 0.05) 0 2px, transparent 2px 60px),
+    repeating-linear-gradient(120deg, rgba(59, 130, 246, 0.05) 0 2px, transparent 2px 60px);
+  background-size: 100% 100%, 100% 100%, 60px 104px, 60px 104px;
+  pointer-events: none;
 }
