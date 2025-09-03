@@ -158,7 +158,7 @@ const LoginPage = () => {
               />
 
               <div className="text-right">
-                <button
+                <button onClick={() => navigate('/forgot')}
                   type="button"
                   className="text-sm text-primary hover:underline"
                   disabled={isLoading}
