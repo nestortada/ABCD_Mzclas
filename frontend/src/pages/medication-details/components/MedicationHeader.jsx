@@ -13,7 +13,7 @@ const MedicationHeader = ({ medication, isFavorite, onToggleFavorite, onShare })
       if (navigator.share) {
         await navigator.share({
           title: `${medication?.name} - Información Clínica`,
-          text: `Información detallada sobre ${medication?.name} - ${medication?.genericName}`,
+          text: `Información detallada sobre ${medication?.name}`,
           url: window.location?.href
         });
       } else {
@@ -64,27 +64,9 @@ const MedicationHeader = ({ medication, isFavorite, onToggleFavorite, onShare })
       <div className="space-y-3">
         <div>
           <h1 className="text-2xl lg:text-3xl font-semibold text-foreground">{medication?.name}</h1>
-          <p className="text-lg text-muted-foreground">{medication?.genericName}</p>
+          <p className="text-lg text-muted-foreground">{medication?.presentation}</p>
         </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center space-x-2 bg-primary/10 px-3 py-1 rounded-full">
-            <Icon name="Shield" size={16} className="text-primary" />
-            <span className="text-sm font-medium text-primary">{medication?.category}</span>
-          </div>
-
-          <div className="flex items-center space-x-2 bg-muted px-3 py-1 rounded-full">
-            <Icon name="Clock" size={16} className="text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Actualizado: {medication?.lastUpdated}</span>
-          </div>
-
-          {medication?.isHighAlert && (
-            <div className="flex items-center space-x-2 bg-error/10 px-3 py-1 rounded-full">
-              <Icon name="AlertTriangle" size={16} className="text-error" />
-              <span className="text-sm font-medium text-error">Medicamento de Alto Riesgo</span>
-            </div>
-          )}
-        </div>
+        <div className="flex flex-wrap items-center gap-3"></div>
       </div>
     </div>
   );

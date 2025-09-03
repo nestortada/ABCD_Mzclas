@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
-const SearchResults = ({ results, searchQuery, selectedCategory, isLoading, hasMedications }) => {
+const SearchResults = ({ results, searchQuery, isLoading, hasMedications }) => {
   const navigate = useNavigate();
 
   const handleMedicationClick = (medication) => {
@@ -44,7 +44,7 @@ const SearchResults = ({ results, searchQuery, selectedCategory, isLoading, hasM
     );
   }
 
-  if (!searchQuery && !selectedCategory) {
+  if (!searchQuery) {
     if (!hasMedications) {
       return (
         <div className="w-full max-w-2xl mx-auto text-center py-12">
@@ -57,7 +57,7 @@ const SearchResults = ({ results, searchQuery, selectedCategory, isLoading, hasM
       <div className="w-full max-w-2xl mx-auto text-center py-12">
         <Icon name="Search" size={48} className="text-slate-300 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-slate-600 mb-2">Busca información médica</h3>
-        <p className="text-slate-500">Utiliza la barra de búsqueda o selecciona una categoría para comenzar</p>
+        <p className="text-slate-500">Utiliza la barra de búsqueda para comenzar</p>
       </div>
     );
   }
@@ -72,9 +72,7 @@ const SearchResults = ({ results, searchQuery, selectedCategory, isLoading, hasM
         {hasMedications && (
           <>
             <p className="text-slate-500 mb-4">
-              {searchQuery
-                ? `No hay resultados para "${searchQuery}"`
-                : `No hay medicamentos en la categoría seleccionada`}
+              {`No hay resultados para "${searchQuery}"`}
             </p>
             <Button variant="outline" onClick={() => window.location?.reload()}>
               <Icon name="RotateCcw" size={16} className="mr-2" />
@@ -99,16 +97,7 @@ const SearchResults = ({ results, searchQuery, selectedCategory, isLoading, hasM
           </p>
         </div>
         
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm">
-            <Icon name="Filter" size={16} className="mr-2" />
-            Filtrar
-          </Button>
-          <Button variant="outline" size="sm">
-            <Icon name="ArrowUpDown" size={16} className="mr-2" />
-            Ordenar
-          </Button>
-        </div>
+        <div className="flex items-center space-x-2"></div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {results?.map((medication) => (
@@ -124,7 +113,7 @@ const SearchResults = ({ results, searchQuery, selectedCategory, isLoading, hasM
                   {medication?.name}
                 </h4>
                 <p className="text-sm text-slate-600 mt-1">
-                  {medication?.genericName}
+                  {medication?.presentation}
                 </p>
               </div>
               <Button
@@ -141,40 +130,19 @@ const SearchResults = ({ results, searchQuery, selectedCategory, isLoading, hasM
               </Button>
             </div>
 
-            {/* Dosage Info */}
+            {/* Basic Info */}
             <div className="space-y-2 mb-4">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-600">Dosis usual:</span>
-                <span className="font-medium text-slate-800">{medication?.dosage}</span>
+              <div className="text-sm">
+                <span className="text-slate-600">Dosis de seguridad:</span>
+                <span className="font-medium text-slate-800"> {medication?.safetyDose}</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
+              <div className="text-sm">
                 <span className="text-slate-600">Vía:</span>
-                <span className="font-medium text-slate-800">{medication?.route}</span>
+                <span className="font-medium text-slate-800"> {medication?.administrationRoute}</span>
               </div>
             </div>
 
-            {/* Safety Indicators */}
-            {medication?.warnings && medication?.warnings?.length > 0 && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
-                <div className="flex items-center space-x-2">
-                  <Icon name="AlertTriangle" size={16} className="text-red-600" />
-                  <span className="text-sm font-medium text-red-800">
-                    {medication?.warnings?.length} advertencia{medication?.warnings?.length !== 1 ? 's' : ''}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Category Badge */}
-            <div className="flex items-center justify-between">
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                medication?.category === 'analgesic' ?'bg-blue-100 text-blue-800'
-                  : medication?.category === 'antibiotic' ?'bg-green-100 text-green-800'
-                  : medication?.category === 'cardiovascular' ?'bg-red-100 text-red-800' :'bg-slate-100 text-slate-800'
-              }`}>
-                {medication?.categoryLabel}
-              </span>
-              
+            <div className="flex items-center justify-end">
               <Icon name="ChevronRight" size={16} className="text-slate-400 group-hover:text-primary transition-colors" />
             </div>
           </div>

@@ -19,38 +19,27 @@ const DosageConcentration = ({ medication }) => {
               <h3 className="font-medium text-foreground">Concentración</h3>
             </div>
             <p className="text-lg font-semibold text-accent">{medication?.concentration}</p>
-            <p className="text-sm text-muted-foreground mt-1">{medication?.concentrationUnit}</p>
           </div>
 
           <div className="p-4 bg-muted/50 rounded-lg border border-border">
             <div className="flex items-center space-x-2 mb-2">
               <Icon name="Scale" size={18} className="text-accent" />
-              <h3 className="font-medium text-foreground">Unidades de Dosis</h3>
+              <h3 className="font-medium text-foreground">Unidad de Dosificación</h3>
             </div>
-            <p className="text-lg font-semibold text-accent">{medication?.dosageUnits}</p>
-            <p className="text-sm text-muted-foreground mt-1">Por unidad de administración</p>
+            <p className="text-lg font-semibold text-accent">{medication?.dosageUnit}</p>
           </div>
         </div>
 
         {/* Dilution Instructions */}
-        {medication?.dilutionInstructions && (
+        {medication?.dilution && (
           <div className="space-y-4">
             <h3 className="font-medium text-foreground flex items-center">
               <Icon name="FlaskConical" size={18} className="mr-2 text-accent" />
-              Instrucciones de Dilución
+              Dilución
             </h3>
-            
+
             <div className="bg-accent/5 border border-accent/20 rounded-lg p-4">
-              <div className="space-y-3">
-                {medication?.dilutionInstructions?.map((instruction, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <div className="flex items-center justify-center w-6 h-6 bg-accent/10 rounded-full text-xs font-medium text-accent mt-0.5">
-                      {index + 1}
-                    </div>
-                    <p className="text-sm text-foreground flex-1">{instruction}</p>
-                  </div>
-                ))}
-              </div>
+              <p className="text-sm text-foreground whitespace-pre-line">{medication?.dilution}</p>
             </div>
           </div>
         )}
@@ -66,7 +55,7 @@ const DosageConcentration = ({ medication }) => {
               <p className="text-sm text-foreground">{medication?.dilutionStability}</p>
             </div>
 
-            {medication?.lightProtection && (
+            {medication?.lightProtection && medication?.lightProtection !== 'No Aplica' && (
               <div className="p-4 bg-warning/5 border border-warning/20 rounded-lg">
                 <div className="flex items-center space-x-2 mb-2">
                   <Icon name="Sun" size={18} className="text-warning" />

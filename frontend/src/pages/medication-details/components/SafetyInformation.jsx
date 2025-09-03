@@ -4,8 +4,8 @@ import Icon from '../../../components/AppIcon';
 const SafetyInformation = ({ medication }) => {
   const safetyItems = [
     {
-      title: 'Dosis Segura',
-      value: medication?.safeDosage,
+      title: 'Dosis de Seguridad',
+      value: medication?.safetyDose,
       icon: 'Calculator',
       type: 'primary'
     },
@@ -16,8 +16,8 @@ const SafetyInformation = ({ medication }) => {
       type: 'secondary'
     },
     {
-      title: 'Forma Farmacéutica',
-      value: medication?.pharmaceuticalForm,
+      title: 'Presentación',
+      value: medication?.presentation,
       icon: 'Pill',
       type: 'secondary'
     },
