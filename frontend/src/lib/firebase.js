@@ -17,26 +17,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Referencia a la colección Sedoanalgesia
-const sedoanalgesiaCollection = collection(db, 'Sedoanalgesia');
+// Referencia a la colección Sedoanalgesicos
+const sedoanalgesicosCollection = collection(db, 'Sedoanalgesicos');
 
-// Funciones para interactuar con la colección Sedoanalgesia
-export const getSedoanalgesia = async () => {
-  const snapshot = await getDocs(sedoanalgesiaCollection);
+// Funciones para interactuar con la colección Sedoanalgesicos
+export const getSedoanalgesicos = async () => {
+  const snapshot = await getDocs(sedoanalgesicosCollection);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-export const addSedoanalgesia = async (data) => {
-  return await addDoc(sedoanalgesiaCollection, data);
+export const addSedoanalgesico = async (data) => {
+  return await addDoc(sedoanalgesicosCollection, data);
 };
 
-export const updateSedoanalgesia = async (id, data) => {
-  const docRef = doc(db, 'Sedoanalgesia', id);
+export const updateSedoanalgesico = async (id, data) => {
+  const docRef = doc(db, 'Sedoanalgesicos', id);
   return await updateDoc(docRef, data);
 };
 
-export const deleteSedoanalgesia = async (id) => {
-  const docRef = doc(db, 'Sedoanalgesia', id);
+export const deleteSedoanalgesico = async (id) => {
+  const docRef = doc(db, 'Sedoanalgesicos', id);
   return await deleteDoc(docRef);
 };
 

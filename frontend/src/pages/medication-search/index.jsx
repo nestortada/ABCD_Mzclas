@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 import ClinicalSearchHeader from '../../components/ui/ClinicalSearchHeader';
 import CategoryShortcuts from './components/CategoryShortcuts';
 import VoiceSearchButton from './components/VoiceSearchButton';
@@ -18,112 +20,18 @@ const MedicationSearch = () => {
   const [filters, setFilters] = useState({});
   const [isVoiceSupported, setIsVoiceSupported] = useState(false);
   const [showRecentSearches, setShowRecentSearches] = useState(false);
+  const [medications, setMedications] = useState([]); // Lista desde Firebase
 
-  // Mock medication data
-  const mockMedications = [
-    {
-      id: 1,
-      name: "Paracetamol",
-      genericName: "Acetaminofén",
-      dosage: "500-1000 mg cada 6-8h",
-      route: "Oral/IV",
-      category: "analgesic",
-      categoryLabel: "Analgésico",
-      warnings: ["No exceder 4g/día", "Precaución en hepatopatía"],
-      form: "tablet",
-      concentration: "500mg/comprimido",
-      dilution: "No requiere dilución para vía oral",
-      incompatibilities: ["Warfarina en dosis altas"],
-      lightProtection: false,
-      stability: "24 meses a temperatura ambiente",
-      keywords: ["paracetamol", "acetaminofén", "dolor", "fiebre", "analgésico", "administrar", "paciente"]
-    },
-    {
-      id: 2,
-      name: "Amoxicilina",
-      genericName: "Amoxicilina",
-      dosage: "250-500 mg cada 8h",
-      route: "Oral",
-      category: "antibiotic",
-      categoryLabel: "Antibiótico",
-      warnings: ["Alergia a penicilinas", "Ajustar en insuficiencia renal"],
-      form: "capsule",
-      concentration: "500mg/cápsula",
-      dilution: "Suspensión: 125mg/5ml",
-      incompatibilities: ["Tetraciclinas", "Cloranfenicol"],
-      lightProtection: false,
-      stability: "36 meses en envase original",
-      keywords: ["amoxicilina", "antibiótico", "infección", "bacteria", "penicilina"]
-    },
-    {
-      id: 3,
-      name: "Omeprazol",
-      genericName: "Omeprazol",
-      dosage: "20-40 mg una vez al día",
-      route: "Oral/IV",
-      category: "gastrointestinal",
-      categoryLabel: "Gastrointestinal",
-      warnings: ["Riesgo de fractura ósea en uso prolongado"],
-      form: "capsule",
-      concentration: "20mg/cápsula",
-      dilution: "IV: Diluir en 100ml SSF",
-      incompatibilities: ["Atazanavir", "Clopidogrel"],
-      lightProtection: true,
-      stability: "24 meses protegido de la luz",
-      keywords: ["omeprazol", "estómago", "acidez", "reflujo", "gastritis"]
-    },
-    {
-      id: 4,
-      name: "Atorvastatina",
-      genericName: "Atorvastatina cálcica",
-      dosage: "10-80 mg una vez al día",
-      route: "Oral",
-      category: "cardiovascular",
-      categoryLabel: "Cardiovascular",
-      warnings: ["Monitorear enzimas hepáticas", "Riesgo de miopatía"],
-      form: "tablet",
-      concentration: "20mg/comprimido",
-      dilution: "No aplicable",
-      incompatibilities: ["Ciclosporina", "Gemfibrozil"],
-      lightProtection: false,
-      stability: "24 meses a temperatura ambiente",
-      keywords: ["atorvastatina", "colesterol", "cardiovascular", "corazón"]
-    },
-    {
-      id: 5,
-      name: "Salbutamol",
-      genericName: "Salbutamol sulfato",
-      dosage: "100-200 mcg cada 4-6h",
-      route: "Inhalación",
-      category: "respiratory",
-      categoryLabel: "Respiratorio",
-      warnings: ["Precaución en cardiopatía", "Puede causar temblor"],
-      form: "inhalation",
-      concentration: "100mcg/pulsación",
-      dilution: "Nebulización: 2.5-5mg en 2-3ml SSF",
-      incompatibilities: ["Beta-bloqueadores no selectivos"],
-      lightProtection: false,
-      stability: "24 meses protegido del calor",
-      keywords: ["salbutamol", "asma", "respiratorio", "broncodilatador", "inhalador"]
-    },
-    {
-      id: 6,
-      name: "Metformina",
-      genericName: "Metformina clorhidrato",
-      dosage: "500-1000 mg cada 12h",
-      route: "Oral",
-      category: "endocrine",
-      categoryLabel: "Endocrino",
-      warnings: ["Contraindicado en insuficiencia renal", "Riesgo de acidosis láctica"],
-      form: "tablet",
-      concentration: "850mg/comprimido",
-      dilution: "No aplicable",
-      incompatibilities: ["Contrastes yodados", "Alcohol"],
-      lightProtection: false,
-      stability: "36 meses en envase original",
-      keywords: ["metformina", "diabetes", "glucosa", "endocrino"]
-    }
-  ];
+  // Escucha cambios en la colección Sedoanalgesicos
+  useEffect(() => {
+    setIsLoading(true);
+    const unsubscribe = onSnapshot(collection(db, 'Sedoanalgesicos'), (snapshot) => {
+      const meds = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setMedications(meds);
+      setIsLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     // Check for voice search support
@@ -144,7 +52,7 @@ const MedicationSearch = () => {
       setSearchResults([]);
       setShowRecentSearches(false);
     }
-  }, [searchQuery, selectedCategory, filters]);
+  }, [searchQuery, selectedCategory, filters, medications]);
 
   const extractKeywordsFromText = (text) => {
     // Remove common words and extract potential medication keywords
@@ -161,7 +69,7 @@ const MedicationSearch = () => {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    let results = mockMedications;
+    let results = medications;
     
     // Enhanced search for voice input with keyword matching
     if (query) {
@@ -316,31 +224,40 @@ const MedicationSearch = () => {
         />
       
       <main className="container mx-auto px-4 py-8 space-y-8">
-        {/* Category Shortcuts */}
-        {!searchQuery && !selectedCategory && !showRecentSearches && (
-          <CategoryShortcuts
-            onCategorySelect={handleCategorySelect}
-            selectedCategory={selectedCategory}
-          />
-        )}
-
-        {/* Recent Searches / Quick Access - Only show when not searching */}
-        {!searchQuery && !selectedCategory && !showRecentSearches && (
-          <RecentSearches onSearchSelect={handleSearchSelect} />
-        )}
-
-        {/* Search Results */}
-        {(searchQuery || selectedCategory) && (
-          <div className="flex gap-6">
-            <div className="flex-1">
-              <SearchResults
-                results={searchResults}
-                searchQuery={searchQuery}
-                selectedCategory={selectedCategory}
-                isLoading={isLoading}
-              />
-            </div>
+        {medications.length === 0 && !isLoading && !searchQuery && !selectedCategory ? (
+          <div className="w-full max-w-2xl mx-auto text-center py-12">
+            <p className="text-lg font-medium text-slate-600">No hay medicamentos en la base de datos</p>
           </div>
+        ) : (
+          <>
+            {/* Category Shortcuts */}
+            {!searchQuery && !selectedCategory && !showRecentSearches && (
+              <CategoryShortcuts
+                onCategorySelect={handleCategorySelect}
+                selectedCategory={selectedCategory}
+              />
+            )}
+
+            {/* Recent Searches / Quick Access - Only show when not searching */}
+            {!searchQuery && !selectedCategory && !showRecentSearches && (
+              <RecentSearches onSearchSelect={handleSearchSelect} />
+            )}
+
+            {/* Search Results */}
+            {(searchQuery || selectedCategory) && (
+              <div className="flex gap-6">
+                <div className="flex-1">
+                  <SearchResults
+                    results={searchResults}
+                    searchQuery={searchQuery}
+                    selectedCategory={selectedCategory}
+                    isLoading={isLoading}
+                    hasMedications={medications.length > 0}
+                  />
+                </div>
+              </div>
+            )}
+          </>
         )}
       </main>
 
