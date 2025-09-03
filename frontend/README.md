@@ -105,3 +105,70 @@ npm run build
 - Styled with Tailwind CSS
 
 Built with ❤️ on Rocket.new
+
+## 🔐 Authentication API
+
+The `/server` directory contains an Express backend that exposes authentication endpoints with JWT and MongoDB.
+
+### Setup
+
+1. Install dependencies:
+   ```bash
+   cd server
+   npm install
+   ```
+2. Create a `.env` file inside `server` and define:
+   ```env
+   MONGODB_URI=mongodb://localhost:27017/mern_auth
+   JWT_SECRET=your_jwt_secret
+   JWT_EXPIRES_IN=1h
+   JWT_RESET_SECRET=your_reset_secret
+   JWT_RESET_EXPIRES_IN=15m
+   FRONTEND_URL=http://localhost:5173
+   SMTP_HOST=smtp.example.com
+   SMTP_PORT=587
+   SMTP_USER=username
+   SMTP_PASS=password
+   FROM_EMAIL=noreply@example.com
+   PORT=5000
+   ```
+3. Start the server:
+   ```bash
+   npm run dev
+   ```
+
+### Example requests
+Base URL: `http://localhost:5000/auth`
+
+```bash
+# Register
+curl -X POST http://localhost:5000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"Password123","name":"User"}'
+
+# Login and store cookie
+curl -i -c cookies.txt -X POST http://localhost:5000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"Password123"}'
+
+# Current user
+curl -b cookies.txt http://localhost:5000/auth/me
+
+# Logout
+curl -b cookies.txt -X POST http://localhost:5000/auth/logout
+
+# Forgot password
+curl -X POST http://localhost:5000/auth/forgot-password \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com"}'
+
+# Reset password
+curl -X POST http://localhost:5000/auth/reset-password \
+  -H "Content-Type: application/json" \
+  -d '{"token":"<token>","newPassword":"NewPass123"}'
+```
+
+### Manual tests
+- Register, login, ensure cookie grants access to `/auth/me`.
+- `/auth/forgot-password` always returns 200.
+- `/auth/reset-password` rejects invalid or expired tokens; after reset, previous login tokens are invalid.
