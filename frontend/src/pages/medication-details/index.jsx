@@ -11,6 +11,8 @@ import RelatedMedications from './components/RelatedMedications';
 import QuickActions from './components/QuickActions';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 
 
 
@@ -25,148 +27,8 @@ const MedicationDetails = () => {
 
   const medicationId = searchParams?.get('id') || '1';
 
-  // Mock medication data
-  const mockMedications = {
-    '1': {
-      id: '1',
-      name: 'Amiodarona',
-      genericName: 'Clorhidrato de Amiodarona',
-      category: 'Antiarrítmico Clase III',
-      lastUpdated: '15 Dic 2024',
-      isHighAlert: true,
-      safeDosage: '5-10 mg/kg en 24 horas (máximo 1200 mg/día)',
-      administrationRoute: 'Intravenosa, Oral',
-      pharmaceuticalForm: 'Ampolla 150mg/3ml, Comprimidos 200mg',
-      administrationTime: '15-30 minutos para infusión IV',
-      concentration: '50 mg/ml',
-      concentrationUnit: 'mg/ml en ampolla',
-      dosageUnits: 'mg/kg/día',
-      specialInstructions: 'Administrar en vía central preferentemente. Monitorear función tiroidea y hepática.',
-      dilutionInstructions: [
-        'Diluir en Dextrosa 5% únicamente (no usar solución salina)',
-        'Concentración final: 1-6 mg/ml para infusión continua',
-        'Usar filtro de 0.22 micrones durante la administración',
-        'No mezclar con otros medicamentos en la misma línea'
-      ],
-      dilutionStability: 'Estable 24 horas a temperatura ambiente una vez diluida',
-      lightProtection: 'Proteger de la luz durante almacenamiento y administración',
-      criticalWarnings: [
-        'Puede causar toxicidad pulmonar grave (fibrosis pulmonar)',
-        'Riesgo de hepatotoxicidad severa',
-        'Interacciones graves con warfarina y digoxina',
-        'Puede prolongar significativamente el intervalo QT'
-      ],
-      incompatibilities: [
-        {
-          drug: 'Heparina Sódica',
-          reason: 'Precipitación inmediata en solución'
-        },
-        {
-          drug: 'Furosemida',
-          reason: 'Incompatibilidad física en Y'
-        },
-        {
-          drug: 'Insulina',
-          reason: 'Adsorción en contenedores plásticos'
-        },
-        {
-          drug: 'Bicarbonato de Sodio',
-          reason: 'Precipitación por cambio de pH'
-        }
-      ],
-      adverseReactions: [
-        {
-          type: 'Toxicidad Pulmonar',
-          description: 'Fibrosis pulmonar, neumonitis intersticial',
-          severity: 'Alta'
-        },
-        {
-          type: 'Hepatotoxicidad',
-          description: 'Elevación de transaminasas, hepatitis',
-          severity: 'Alta'
-        },
-        {
-          type: 'Disfunción Tiroidea',
-          description: 'Hiper o hipotiroidismo',
-          severity: 'Media'
-        },
-        {
-          type: 'Fotosensibilidad',
-          description: 'Pigmentación cutánea azul-grisácea',
-          severity: 'Baja'
-        }
-      ],
-      contraindications: [
-        'Hipersensibilidad conocida a amiodarona o yodo',
-        'Bradicardia sinusal severa o bloqueo AV de alto grado',
-        'Síndrome del seno enfermo',
-        'Embarazo y lactancia',
-        'Disfunción tiroidea no controlada'
-      ],
-      clinicalObservations: [
-        {
-          title: 'Monitoreo Cardíaco Continuo',
-          category: 'Monitoreo',
-          priority: 'Alta',
-          description: 'Requiere monitoreo electrocardiográfico continuo durante la administración intravenosa. Vigilar especialmente el intervalo QT y la aparición de nuevas arritmias.',
-          recommendations: [
-            'ECG basal antes del inicio del tratamiento',
-            'Monitoreo continuo durante infusión IV',
-            'ECG de control cada 24 horas durante tratamiento',
-            'Suspender si QTc > 500 ms'
-          ],
-          monitoringParameters: [
-            'Frecuencia cardíaca',
-            'Ritmo cardíaco',
-            'Intervalo QT/QTc',
-            'Presión arterial'
-          ],
-          lastUpdated: '10 Dic 2024',
-          source: 'Guías ESC 2024'
-        },
-        {
-          title: 'Función Hepática y Tiroidea',
-          category: 'Laboratorio',
-          priority: 'Alta',
-          description: 'La amiodarona puede causar hepatotoxicidad y alteraciones tiroideas significativas. Es esencial el monitoreo regular de la función hepática y tiroidea.',
-          recommendations: [
-            'Función hepática basal y cada 6 meses',
-            'Función tiroidea (TSH, T3, T4) basal y cada 6 meses',
-            'Suspender si ALT/AST > 3 veces el límite superior normal',
-            'Evaluar función tiroidea ante síntomas sugestivos'
-          ],
-          monitoringParameters: [
-            'ALT, AST, Bilirrubina',
-            'TSH, T3 libre, T4 libre',
-            'Fosfatasa alcalina'
-          ],
-          lastUpdated: '08 Dic 2024',
-          source: 'Consenso SECARDIOLOGÍA'
-        },
-        {
-          title: 'Evaluación Pulmonar',
-          category: 'Seguimiento',
-          priority: 'Media',
-          description: 'La toxicidad pulmonar es una complicación grave pero poco frecuente. Requiere evaluación clínica y radiológica periódica.',
-          recommendations: [
-            'Radiografía de tórax basal',
-            'Evaluación clínica de síntomas respiratorios',
-            'Considerar TAC torácico si hay sospecha de toxicidad',
-            'Pruebas de función pulmonar en tratamientos prolongados'
-          ],
-          monitoringParameters: [
-            'Disnea, tos seca',
-            'Radiografía de tórax',
-            'Saturación de oxígeno'
-          ],
-          lastUpdated: '05 Dic 2024',
-          source: 'Guías ATS/ERS'
-        }
-      ]
-    }
-  };
 
-  const mockRelatedMedications = [
+  const relatedMedications = [
     {
       id: '2',
       name: 'Lidocaína',
@@ -215,24 +77,28 @@ const MedicationDetails = () => {
       return;
     }
 
-    // Simulate loading medication data
     setIsLoading(true);
-    setTimeout(() => {
-      const medicationData = mockMedications?.[medicationId];
-      if (medicationData) {
-        setMedication(medicationData);
-        
-        // Check if medication is in favorites
+    const docRef = doc(db, 'Sedoanalgesicos', medicationId);
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = { id: docSnap.id, ...docSnap.data() };
+        setMedication(data);
+
+        // Verificar si está en favoritos
         const favorites = JSON.parse(localStorage.getItem('clinicalDict_favorites') || '[]');
-        setIsFavorite(favorites?.includes(medicationId));
-        
-        // Add to recently viewed
+        setIsFavorite(favorites.includes(docSnap.id));
+
+        // Actualizar recientemente vistos
         const recentlyViewed = JSON.parse(localStorage.getItem('clinicalDict_recentlyViewed') || '[]');
-        const updated = [medicationId, ...recentlyViewed?.filter(id => id !== medicationId)]?.slice(0, 10);
+        const updated = [docSnap.id, ...recentlyViewed.filter(id => id !== docSnap.id)].slice(0, 10);
         localStorage.setItem('clinicalDict_recentlyViewed', JSON.stringify(updated));
+      } else {
+        navigate('/medication-search');
       }
       setIsLoading(false);
-    }, 800);
+    });
+
+    return () => unsubscribe();
   }, [medicationId, isAuthenticated, navigate]);
 
   const handleToggleFavorite = () => {
@@ -343,7 +209,7 @@ const MedicationDetails = () => {
               onAddToFavorites={handleToggleFavorite}
               onPrintInfo={handlePrintInfo}
             />
-            <RelatedMedications relatedMedications={mockRelatedMedications} />
+            <RelatedMedications relatedMedications={relatedMedications} />
           </div>
         </div>
       </div>

@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
-const SearchResults = ({ results, searchQuery, selectedCategory, isLoading }) => {
+const SearchResults = ({ results, searchQuery, selectedCategory, isLoading, hasMedications }) => {
   const navigate = useNavigate();
 
   const handleMedicationClick = (medication) => {
-    navigate('/medication-details', { state: { medication } });
+    navigate(`/medication-details?id=${medication?.id}`);
   };
 
   const addToFavorites = (medicationId, e) => {
@@ -45,15 +45,19 @@ const SearchResults = ({ results, searchQuery, selectedCategory, isLoading }) =>
   }
 
   if (!searchQuery && !selectedCategory) {
+    if (!hasMedications) {
+      return (
+        <div className="w-full max-w-2xl mx-auto text-center py-12">
+          <Icon name="FileX" size={48} className="text-slate-300 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-slate-600 mb-2">No hay medicamentos en la base de datos</h3>
+        </div>
+      );
+    }
     return (
       <div className="w-full max-w-2xl mx-auto text-center py-12">
         <Icon name="Search" size={48} className="text-slate-300 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-slate-600 mb-2">
-          Busca información médica
-        </h3>
-        <p className="text-slate-500">
-          Utiliza la barra de búsqueda o selecciona una categoría para comenzar
-        </p>
+        <h3 className="text-lg font-medium text-slate-600 mb-2">Busca información médica</h3>
+        <p className="text-slate-500">Utiliza la barra de búsqueda o selecciona una categoría para comenzar</p>
       </div>
     );
   }
@@ -63,18 +67,21 @@ const SearchResults = ({ results, searchQuery, selectedCategory, isLoading }) =>
       <div className="w-full max-w-2xl mx-auto text-center py-12">
         <Icon name="FileX" size={48} className="text-slate-300 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-slate-600 mb-2">
-          No se encontraron resultados
+          {hasMedications ? 'No se encontraron resultados' : 'No hay medicamentos en la base de datos'}
         </h3>
-        <p className="text-slate-500 mb-4">
-          {searchQuery 
-            ? `No hay resultados para "${searchQuery}"`
-            : `No hay medicamentos en la categoría seleccionada`
-          }
-        </p>
-        <Button variant="outline" onClick={() => window.location?.reload()}>
-          <Icon name="RotateCcw" size={16} className="mr-2" />
-          Limpiar búsqueda
-        </Button>
+        {hasMedications && (
+          <>
+            <p className="text-slate-500 mb-4">
+              {searchQuery
+                ? `No hay resultados para "${searchQuery}"`
+                : `No hay medicamentos en la categoría seleccionada`}
+            </p>
+            <Button variant="outline" onClick={() => window.location?.reload()}>
+              <Icon name="RotateCcw" size={16} className="mr-2" />
+              Limpiar búsqueda
+            </Button>
+          </>
+        )}
       </div>
     );
   }
