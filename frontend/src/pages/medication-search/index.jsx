@@ -18,19 +18,8 @@ const MedicationSearch = () => {
 
   // Cargar datos locales de sedoanalgésicos
   useEffect(() => {
-    // Transform the data to match the expected format
-    const transformedData = medicationsData.Sheet1.map((med, index) => ({
-      id: index + 1,
-      name: med.Medicamento,
-      presentation: med.Presentacion,
-      dosage: med["Dosis de seguridad"],
-      administration: med["Via / Forma de administracion"],
-      concentration: med.Concentracion,
-      dilution: med.Dilucion,
-      incompatibilities: med.Incompatibilidades,
-      observations: med.Observaciones
-    }));
-    setMedications(transformedData);
+    // Usar los datos directamente del JSON
+    setMedications(medicationsData.Sheet1);
   }, []);
 
   useEffect(() => {

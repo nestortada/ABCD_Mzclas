@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import { getCurrentLocation } from '../../../utils/geoLocation';
+import MedicationModal from '../../../components/MedicationModal';
 
 const SearchResults = ({ results, searchQuery, isLoading, hasMedications }) => {
-  const navigate = useNavigate();
   const [locationError, setLocationError] = useState(null);
   const [isLocationVerified, setIsLocationVerified] = useState(false);
   const [isCheckingLocation, setIsCheckingLocation] = useState(true);
+  const [selectedMedication, setSelectedMedication] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     verifyLocation();
@@ -29,7 +31,8 @@ const SearchResults = ({ results, searchQuery, isLoading, hasMedications }) => {
   };
 
   const handleMedicationClick = (medication) => {
-    navigate(`/medication-details?id=${medication?.id}`);
+    setSelectedMedication(medication);
+    setIsModalOpen(true);
   };
 
   const addToFavorites = (medicationId, e) => {
@@ -179,10 +182,10 @@ const SearchResults = ({ results, searchQuery, isLoading, hasMedications }) => {
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <h4 className="font-semibold text-slate-800 group-hover:text-primary transition-colors">
-                  {medication?.name}
+                  {medication?.Medicamento || 'Sin nombre'}
                 </h4>
                 <p className="text-sm text-slate-600 mt-1">
-                  {medication?.presentation}
+                  {medication?.Presentacion || 'Sin presentación'}
                 </p>
               </div>
               <Button
@@ -203,11 +206,15 @@ const SearchResults = ({ results, searchQuery, isLoading, hasMedications }) => {
             <div className="space-y-2 mb-4">
               <div className="text-sm">
                 <span className="text-slate-600">Dosis de seguridad:</span>
-                <span className="font-medium text-slate-800"> {medication?.dosage}</span>
+                <span className="font-medium text-slate-800"> {medication?.['Dosis de seguridad']}</span>
               </div>
               <div className="text-sm">
                 <span className="text-slate-600">Vía:</span>
-                <span className="font-medium text-slate-800"> {medication?.administration}</span>
+                <span className="font-medium text-slate-800"> {medication?.['Via / Forma de administracion']}</span>
+              </div>
+              <div className="text-sm">
+                <span className="text-slate-600">Concentración:</span>
+                <span className="font-medium text-slate-800"> {medication?.Concentracion}</span>
               </div>
             </div>
 
@@ -217,6 +224,13 @@ const SearchResults = ({ results, searchQuery, isLoading, hasMedications }) => {
           </div>
         ))}
       </div>
+
+      {/* Modal */}
+      <MedicationModal
+        medication={selectedMedication}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };
