@@ -51,8 +51,6 @@ const ClinicalSearchHeader = ({
   };
 
   const handleHomeClick = () => {
-    const input = document.getElementById('search-input');
-    if (input) input.value = '';
     if (onHome) {
       onHome();
     } else if (onSearchChange) {
@@ -68,7 +66,6 @@ const ClinicalSearchHeader = ({
         {/* Home Button */}
         <div className="flex items-center space-x-3">
           <Button
-            id="home-btn"
             variant="ghost"
             size="icon"
             onClick={handleHomeClick}
@@ -94,13 +91,11 @@ const ClinicalSearchHeader = ({
         <div className="flex-1 max-w-2xl mx-4 lg:mx-8 relative">
           <div className="relative">
             <Input
-              id="search-input"
               type="search"
               placeholder="Buscar sedoanalgésicos, dosis, diluciones…"
               value={searchQuery}
               onChange={(e) => onSearchChange && onSearchChange(e?.target?.value)}
               onFocus={() => onSearchFocus && onSearchFocus()}
-              onBlur={() => onCloseRecentSearches && onCloseRecentSearches()}
               onKeyPress={(e) => e?.key === 'Enter' && handleSearch(e?.target?.value)}
               className="pl-10"
             />
