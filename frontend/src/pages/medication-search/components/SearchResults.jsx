@@ -134,11 +134,11 @@ const SearchResults = ({ results, searchQuery, isLoading, hasMedications }) => {
             <div className="space-y-2 mb-4">
               <div className="text-sm">
                 <span className="text-slate-600">Dosis de seguridad:</span>
-                <span className="font-medium text-slate-800"> {medication?.safetyDose}</span>
+                <span className="font-medium text-slate-800"> {medication?.dosage}</span>
               </div>
               <div className="text-sm">
                 <span className="text-slate-600">Vía:</span>
-                <span className="font-medium text-slate-800"> {medication?.administrationRoute}</span>
+                <span className="font-medium text-slate-800"> {medication?.administration}</span>
               </div>
             </div>
 

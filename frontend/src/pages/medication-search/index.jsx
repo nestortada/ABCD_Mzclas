@@ -4,7 +4,7 @@ import ClinicalSearchHeader from '../../components/ui/ClinicalSearchHeader';
 import VoiceSearchButton from './components/VoiceSearchButton';
 import SearchResults from './components/SearchResults';
 import RecentSearches from './components/RecentSearches';
-import medicationsData from '../../data/sedoanalgesicos.json';
+import medicationsData from '../../../FARMACOTECA_REORGANIZADA.json';
 
 const MedicationSearch = () => {
   const location = useLocation();
@@ -18,7 +18,19 @@ const MedicationSearch = () => {
 
   // Cargar datos locales de sedoanalgésicos
   useEffect(() => {
-    setMedications(medicationsData);
+    // Transform the data to match the expected format
+    const transformedData = medicationsData.Sheet1.map((med, index) => ({
+      id: index + 1,
+      name: med.Medicamento,
+      presentation: med.Presentacion,
+      dosage: med["Dosis de seguridad"],
+      administration: med["Via / Forma de administracion"],
+      concentration: med.Concentracion,
+      dilution: med.Dilucion,
+      incompatibilities: med.Incompatibilidades,
+      observations: med.Observaciones
+    }));
+    setMedications(transformedData);
   }, []);
 
   useEffect(() => {
@@ -42,19 +54,42 @@ const MedicationSearch = () => {
 
 
   const performSearch = async (query = '') => {
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const q = query.toLowerCase();
-    const results = medications.filter(med =>
-      med.name.toLowerCase().includes(q) ||
-      med.presentation.toLowerCase().includes(q) ||
-      med.administrationRoute.toLowerCase().includes(q) ||
-      med.observations.toLowerCase().includes(q)
-    );
-    setSearchResults(results);
-    setIsLoading(false);
+    try {
+      setIsLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 300));
+      const q = query.toLowerCase();
+      
+      if (!q) {
+        setSearchResults([]);
+        return;
+      }
+      
+      const results = medications.filter(med =>
+        med.name.toLowerCase().includes(q) ||
+        med.presentation.toLowerCase().includes(q) ||
+        med.dosage.toLowerCase().includes(q) ||
+        med.administration.toLowerCase().includes(q) ||
+        med.concentration.toLowerCase().includes(q) ||
+        med.dilution.toLowerCase().includes(q) ||
+        med.observations.toLowerCase().includes(q)
+      );
+      
+      // Update search results
+      setSearchResults(results);
+      
+      // Save to recent searches
+      if (query.trim()) {
+        const recentSearches = JSON.parse(localStorage.getItem('clinicalDict_recentSearches') || '[]');
+        const updatedSearches = [query, ...recentSearches.filter(s => s !== query)].slice(0, 5);
+        localStorage.setItem('clinicalDict_recentSearches', JSON.stringify(updatedSearches));
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
-
   const handleSearchChange = (query) => {
     setSearchQuery(query);
     if (query?.trim()) {
@@ -62,15 +97,17 @@ const MedicationSearch = () => {
     }
   };
 
-    const handleSearchFocus = () => {
-      if (!searchQuery?.trim()) {
-        setShowRecentSearches(true);
-      }
-    };
+  const handleSearchFocus = () => {
+    if (!searchQuery?.trim()) {
+      setShowRecentSearches(true);
+    }
+  };
 
 
   const handleVoiceSearch = () => {
     if (!isVoiceSupported) {
+      return;
+    }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
@@ -103,7 +140,7 @@ const MedicationSearch = () => {
       setIsVoiceActive(false);
     };
 
-    recognition?.start();
+    recognition.start();
   };
 
   const handleHome = () => {
@@ -117,8 +154,8 @@ const MedicationSearch = () => {
   };
 
   return (
-      <div className="min-h-screen hex-bg">
-        <ClinicalSearchHeader
+    <div className="min-h-screen hex-bg">
+      <ClinicalSearchHeader
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
           onSearchFocus={handleSearchFocus}
@@ -158,11 +195,11 @@ const MedicationSearch = () => {
       </main>
 
       {/* Voice Search Button */}
-        <VoiceSearchButton
-          isActive={isVoiceActive}
-          onActivate={handleVoiceSearch}
-          isSupported={isVoiceSupported}
-        />
+      <VoiceSearchButton
+        isActive={isVoiceActive}
+        onActivate={handleVoiceSearch}
+        isSupported={isVoiceSupported}
+      />
     </div>
   );
 };

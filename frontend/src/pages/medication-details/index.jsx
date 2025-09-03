@@ -10,7 +10,7 @@ import ClinicalObservations from './components/ClinicalObservations';
 import QuickActions from './components/QuickActions';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
-import medicationsData from '../../data/sedoanalgesicos.json';
+import medicationsData from '../../../FARMACOTECA_REORGANIZADA.json';
 
 
 
@@ -31,7 +31,23 @@ const MedicationDetails = () => {
       return;
     }
 
-    const data = medicationsData.find(m => m.id === medicationId);
+    const index = parseInt(medicationId) - 1;
+    const rawData = medicationsData.Sheet1[index];
+    const data = rawData ? {
+      id: medicationId,
+      name: rawData.Medicamento,
+      presentation: rawData.Presentacion,
+      dosage: rawData["Dosis de seguridad"],
+      administration: rawData["Via / Forma de administracion"],
+      concentration: rawData.Concentracion,
+      dilution: rawData.Dilucion,
+      incompatibilities: rawData.Incompatibilidades,
+      observations: rawData.Observaciones,
+      stability: rawData["Estabilidad de la dilucion"],
+      lightProtection: rawData["Proteccion de la luz"],
+      administrationTime: rawData["Tiempo de administracion"],
+      dosageUnit: rawData["Unidad de dosificacion"]
+    } : null;
     if (data) {
       setMedication(data);
 
