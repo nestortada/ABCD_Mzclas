@@ -7,12 +7,10 @@ import SafetyInformation from './components/SafetyInformation';
 import DosageConcentration from './components/DosageConcentration';
 import WarningsIncompatibilities from './components/WarningsIncompatibilities';
 import ClinicalObservations from './components/ClinicalObservations';
-import RelatedMedications from './components/RelatedMedications';
 import QuickActions from './components/QuickActions';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import medicationsData from '../../data/sedoanalgesicos.json';
 
 
 
@@ -27,78 +25,26 @@ const MedicationDetails = () => {
 
   const medicationId = searchParams?.get('id') || '1';
 
-
-  const relatedMedications = [
-    {
-      id: '2',
-      name: 'Lidocaína',
-      genericName: 'Clorhidrato de Lidocaína',
-      category: 'Antiarrítmico Clase IB',
-      relationshipType: 'Alternativa terapéutica',
-      similarityScore: 75,
-      keyDifferences: 'Menor duración de acción, menos efectos adversos sistémicos',
-      isHighAlert: false
-    },
-    {
-      id: '3',
-      name: 'Propafenona',
-      genericName: 'Clorhidrato de Propafenona',
-      category: 'Antiarrítmico Clase IC',
-      relationshipType: 'Misma indicación',
-      similarityScore: 68,
-      keyDifferences: 'Vía oral únicamente, contraindicada en cardiopatía estructural',
-      isHighAlert: false
-    },
-    {
-      id: '4',
-      name: 'Sotalol',
-      genericName: 'Clorhidrato de Sotalol',
-      category: 'Antiarrítmico Clase III',
-      relationshipType: 'Misma clase farmacológica',
-      similarityScore: 82,
-      keyDifferences: 'También tiene propiedades beta-bloqueantes',
-      isHighAlert: true
-    },
-    {
-      id: '5',
-      name: 'Dronedarona',
-      genericName: 'Dronedarona',
-      category: 'Antiarrítmico Clase III',
-      relationshipType: 'Análogo estructural',
-      similarityScore: 90,
-      keyDifferences: 'Menor toxicidad tiroidea y pulmonar, solo vía oral',
-      isHighAlert: false
-    }
-  ];
-
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
 
-    setIsLoading(true);
-    const docRef = doc(db, 'Sedoanalgesicos', medicationId);
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = { id: docSnap.id, ...docSnap.data() };
-        setMedication(data);
+    const data = medicationsData.find(m => m.id === medicationId);
+    if (data) {
+      setMedication(data);
 
-        // Verificar si está en favoritos
-        const favorites = JSON.parse(localStorage.getItem('clinicalDict_favorites') || '[]');
-        setIsFavorite(favorites.includes(docSnap.id));
+      const favorites = JSON.parse(localStorage.getItem('clinicalDict_favorites') || '[]');
+      setIsFavorite(favorites.includes(medicationId));
 
-        // Actualizar recientemente vistos
-        const recentlyViewed = JSON.parse(localStorage.getItem('clinicalDict_recentlyViewed') || '[]');
-        const updated = [docSnap.id, ...recentlyViewed.filter(id => id !== docSnap.id)].slice(0, 10);
-        localStorage.setItem('clinicalDict_recentlyViewed', JSON.stringify(updated));
-      } else {
-        navigate('/medication-search');
-      }
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
+      const recentlyViewed = JSON.parse(localStorage.getItem('clinicalDict_recentlyViewed') || '[]');
+      const updated = [medicationId, ...recentlyViewed.filter(id => id !== medicationId)].slice(0, 10);
+      localStorage.setItem('clinicalDict_recentlyViewed', JSON.stringify(updated));
+    } else {
+      navigate('/medication-search');
+    }
+    setIsLoading(false);
   }, [medicationId, isAuthenticated, navigate]);
 
   const handleToggleFavorite = () => {
@@ -204,12 +150,11 @@ const MedicationDetails = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <QuickActions 
+            <QuickActions
               medication={medication}
               onAddToFavorites={handleToggleFavorite}
               onPrintInfo={handlePrintInfo}
             />
-            <RelatedMedications relatedMedications={relatedMedications} />
           </div>
         </div>
       </div>
