@@ -260,6 +260,7 @@ const LoginForm = ({ currentLanguage, onLanguageChange }) => {
             type="button"
             className="text-sm text-blue-600 hover:text-blue-800 underline transition-colors"
             disabled={isLoading}
+            onClick={() => navigate('/forgot')}
           >
             {t?.forgotPassword}
           </button>

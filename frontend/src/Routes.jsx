@@ -19,6 +19,8 @@ import ContentManagement from './pages/content-management';
 import MedicationSearch from './pages/medication-search';
 import MedicationDetails from './pages/medication-details';
 import NotFound from "pages/NotFound";
+import ForgotPasswordPage from './pages/forgot-password';
+import ResetPasswordPage from './pages/reset-password';
 
 const Routes = () => {
   return (
@@ -30,6 +32,8 @@ const Routes = () => {
             {/* Public Routes */}
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot" element={<ForgotPasswordPage />} />
+            <Route path="/reset" element={<ResetPasswordPage />} />
             
             {/* Protected Admin Routes */}
             <Route
