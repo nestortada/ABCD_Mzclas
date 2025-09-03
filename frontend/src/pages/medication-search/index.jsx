@@ -6,6 +6,59 @@ import SearchResults from './components/SearchResults';
 import RecentSearches from './components/RecentSearches';
 import medicationsData from '../../../FARMACOTECA_REORGANIZADA.json';
 
+// Diccionario de términos médicos y sus variantes
+const medicalTerms = {
+  // Nombres de medicamentos y sus variantes comunes
+  'fentanilo': ['fentalino', 'fentanil', 'fentanyl', 'fentalina'],
+  'dexmedetomidina': ['dexmetedomidina', 'dexmed', 'precedex'],
+  'midazolam': ['midazolan', 'dormicum'],
+  'morfina': ['morfin', 'morfi'],
+  'ketamina': ['ketamin', 'ketalar'],
+  // Términos de presentación
+  'ampolla': ['amp', 'amp', 'ampolla'],
+  'bolsa': ['bolsa', 'bag'],
+  // Unidades de medida
+  'mcg': ['mcg', 'µg', 'microgramos', 'microgramo'],
+  'mg': ['mg', 'miligramos', 'miligramo'],
+  'ml': ['ml', 'mililitros', 'mililitro'],
+  // Vías de administración
+  'intravenosa': ['iv', 'intravenosa', 'intravenoso', 'endovenosa'],
+  'central': ['central', 'cvc', 'cateter central'],
+  'periferico': ['periferico', 'periferica', 'vvp'],
+};
+
+// Función para calcular la distancia de Levenshtein (similitud entre palabras)
+const levenshteinDistance = (a, b) => {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+
+  const matrix = [];
+
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
+};
+
 const MedicationSearch = () => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,7 +96,7 @@ const MedicationSearch = () => {
 
 
   const extractKeywords = (text) => {
-    // Lista de palabras a ignorar (stop words en español)
+    // Lista de palabras a ignorar
     const stopWords = new Set([
       'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas',
       'de', 'del', 'y', 'o', 'para', 'por', 'con', 'sin',
@@ -54,17 +107,41 @@ const MedicationSearch = () => {
       'yo', 'tú', 'él', 'ella', 'nosotros', 'vosotros', 'ellos', 'ellas',
       'me', 'te', 'se', 'nos', 'os', 'mi', 'tu', 'su',
       'este', 'esta', 'estos', 'estas', 'ese', 'esa', 'esos', 'esas',
-      'necesito', 'quiero', 'busco', 'dosis', 'cantidad', 'dar'
+      'necesito', 'quiero', 'busco', 'cantidad', 'dar',
+      'porfavor', 'por', 'favor', 'gracias', 'necesito', 'urgente', 'ayuda'
     ]);
 
-    // Eliminar puntuación y dividir en palabras
+    // Limpiar el texto y dividir en palabras
     const words = text
       .toLowerCase()
-      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')  // Eliminar puntuación
-      .split(/\s+/);  // Dividir por espacios
+      .replace(/[¿?.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+      .split(/\s+/);
 
-    // Filtrar stop words y palabras vacías
-    return words.filter(word => word.length > 2 && !stopWords.has(word));
+    // Normalizar términos médicos
+    const normalizedWords = words.map(word => {
+      // Buscar en el diccionario de términos médicos
+      for (const [standardTerm, variants] of Object.entries(medicalTerms)) {
+        if (variants.includes(word)) {
+          return standardTerm;
+        }
+      }
+      return word;
+    });
+
+    // Filtrar palabras vacías y stop words, pero mantener palabras clave médicas
+    const filteredWords = normalizedWords.filter(word => {
+      // Siempre mantener palabras que son términos médicos o sus variantes
+      for (const [_, variants] of Object.entries(medicalTerms)) {
+        if (variants.includes(word)) return true;
+      }
+      // Para otras palabras, aplicar filtros normales
+      return word.length > 2 && !stopWords.has(word);
+    });
+
+    // Si no hay palabras después del filtrado, mantener al menos los términos médicos
+    return filteredWords.length > 0 ? filteredWords : 
+           normalizedWords.filter(word => 
+             Object.values(medicalTerms).some(variants => variants.includes(word)));
   };
 
   const performSearch = async (query = '') => {
@@ -77,36 +154,94 @@ const MedicationSearch = () => {
         return;
       }
 
-      // Extraer palabras clave de la consulta
-      const keywords = extractKeywords(query);
+      // Normalizar la consulta
+      const searchTerm = query.toLowerCase()
+        .replace(/[¿?.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+        .replace(/buscar|busca|encontrar|encuentra|dame|necesito|quiero|urgente|porfavor|por favor/g, '')
+        .trim();
+
+      // Corregir términos comunes mal escritos
+      const corrections = {
+        'fentalino': 'fentanilo',
+        'fentanyl': 'fentanilo',
+        'fentalina': 'fentanilo',
+        'dexmed': 'dexmedetomidina',
+        'midazolan': 'midazolam',
+        'ketalar': 'ketamina'
+      };
+
+      const keywords = searchTerm.split(/\s+/).map(word => 
+        corrections[word] || word
+      ).filter(word => word.length > 2);
       
-      // Si no hay palabras clave válidas después de filtrar, mostrar todos los resultados
       if (keywords.length === 0) {
-        setSearchResults(medications);
+        const sortedMeds = [...medications].sort((a, b) => a.name.localeCompare(b.name));
+        setSearchResults(sortedMeds);
         return;
       }
 
-      // Buscar medicamentos que coincidan con cualquiera de las palabras clave
-      const results = medications.filter(med => {
-        const searchFields = [
-          med.name.toLowerCase(),
-          med.presentation.toLowerCase(),
-          med.dosage.toLowerCase(),
-          med.administration.toLowerCase(),
-          med.concentration.toLowerCase(),
-          med.dilution.toLowerCase(),
-          med.observations.toLowerCase()
-        ];
+      // Buscar y puntuar medicamentos que coincidan con las palabras clave
+      const scoredResults = medications.map(med => {
+        // Preparar campos del medicamento para búsqueda
+        const medFields = {
+          name: med.name?.toLowerCase() || '',
+          presentation: med.presentation?.toLowerCase() || '',
+          dosage: med.dosage?.toLowerCase() || '',
+          administration: med.administration?.toLowerCase() || '',
+          concentration: med.concentration?.toLowerCase() || '',
+          dilution: med.dilution?.toLowerCase() || '',
+          observations: med.observations?.toLowerCase() || ''
+        };
 
-        // Un medicamento coincide si alguna de sus palabras clave está en algún campo
-        return keywords.some(keyword => 
-          searchFields.some(field => field.includes(keyword))
-        );
-      });
-      
-      // Update search results
-      setSearchResults(results);
-      
+        let score = 0;
+        let matchedKeywords = 0;
+
+        // Evaluar cada palabra clave
+        keywords.forEach(keyword => {
+          // Mayor peso para coincidencias en el nombre del medicamento
+          if (medFields.name.includes(keyword)) {
+            score += 10;
+            matchedKeywords++;
+          }
+
+          // Peso medio para coincidencias en campos importantes
+          if (medFields.presentation.includes(keyword) ||
+              medFields.dosage.includes(keyword) ||
+              medFields.concentration.includes(keyword)) {
+            score += 5;
+            matchedKeywords++;
+          }
+
+          // Peso menor para otros campos
+          if (medFields.administration.includes(keyword) ||
+              medFields.dilution.includes(keyword) ||
+              medFields.observations.includes(keyword)) {
+            score += 3;
+            matchedKeywords++;
+          }
+
+          // Buscar coincidencias parciales si no hubo coincidencias exactas
+          if (matchedKeywords === 0) {
+            const medText = Object.values(medFields).join(' ');
+            const words = medText.split(/\s+/);
+            const hasPartialMatch = words.some(word => {
+              const distance = levenshteinDistance(word, keyword);
+              return distance <= (keyword.length <= 4 ? 1 : 2);
+            });
+            if (hasPartialMatch) score += 1;
+          }
+        });
+
+        return {
+          ...med,
+          score,
+          matchCount: matchedKeywords
+        };
+      }).filter(result => result.score > 0)
+        .sort((a, b) => b.score - a.score);
+
+      setSearchResults(scoredResults);
+
       // Save to recent searches
       if (query.trim()) {
         const recentSearches = JSON.parse(localStorage.getItem('clinicalDict_recentSearches') || '[]');
@@ -152,12 +287,22 @@ const MedicationSearch = () => {
 
     recognition.onresult = (event) => {
       const transcript = event?.results?.[0]?.[0]?.transcript;
-      setSearchQuery(transcript);
+      // Limpiar el texto reconocido antes de usarlo
+      const cleanedTranscript = transcript
+        .toLowerCase()
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿?]/g, '') // Eliminar puntuación
+        .replace(/busca|buscar|encuentra|encontrar|dame|necesito|quiero|por favor|porfavor/gi, '') // Eliminar palabras comunes
+        .trim();
+      
+      setSearchQuery(cleanedTranscript);
       setShowRecentSearches(false);
+
+      // Realizar la búsqueda inmediatamente
+      performSearch(cleanedTranscript);
 
       // Save to recent searches
       const recentSearches = JSON.parse(localStorage.getItem('clinicalDict_recentSearches') || '[]');
-      const updated = [transcript, ...recentSearches?.filter(s => s !== transcript)]?.slice(0, 5);
+      const updated = [cleanedTranscript, ...recentSearches?.filter(s => s !== cleanedTranscript)]?.slice(0, 5);
       localStorage.setItem('clinicalDict_recentSearches', JSON.stringify(updated));
     };
 
