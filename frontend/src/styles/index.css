@@ -12,11 +12,6 @@ body {
 }
 
 .hex-bg {
-  background-color: #f8fafc;
-  background-image:
-    linear-gradient(30deg, rgba(59,130,246,0.15) 12%, transparent 12.5%, transparent 87%, rgba(59,130,246,0.15) 87.5%, rgba(59,130,246,0.15)),
-    linear-gradient(150deg, rgba(59,130,246,0.15) 12%, transparent 12.5%, transparent 87%, rgba(59,130,246,0.15) 87.5%, rgba(59,130,246,0.15)),
-    linear-gradient(90deg, rgba(59,130,246,0.15) 2%, transparent 2.5%, transparent 97%, rgba(59,130,246,0.15) 97.5%, rgba(59,130,246,0.15));
-  background-size: 60px 104px;
-  background-position: 0 0, 0 0, 0 0;
+  /* Plain light blue-tinted background without pattern */
+  background-color: #f8fbff;
 }
