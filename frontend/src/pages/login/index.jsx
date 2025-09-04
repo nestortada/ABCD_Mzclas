@@ -45,14 +45,21 @@ const LoginPage = () => {
       // Simulate authentication delay
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Simple validation for demo
-        if (!formData?.email || !formData?.password) {
-          throw new Error('Por favor complete todos los campos');
-        }
+      // Validate required fields
+      if (!formData?.email || !formData?.password) {
+        throw new Error('Por favor complete todos los campos');
+      }
 
-        if (formData?.password?.length < 6) {
-          throw new Error('La contraseña debe tener al menos 6 caracteres');
-        }
+      // Check if credentials match demo accounts
+      const validCredential = demoCredentials.find(
+        cred => cred.email === formData.email && 
+                cred.password === formData.password && 
+                cred.role === formData.role
+      );
+
+      if (!validCredential) {
+        throw new Error('Credenciales inválidas. Por favor use las credenciales de demostración.');
+      }
 
       // Authenticate user
       login(formData?.role);
