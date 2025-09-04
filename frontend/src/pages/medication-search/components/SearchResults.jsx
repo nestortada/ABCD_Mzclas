@@ -1,17 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
-import { getCurrentLocation } from '../../../utils/geoLocation';
+import MedicationModal from './MedicationModal';
 
 const SearchResults = ({ results, searchQuery, isLoading, hasMedications }) => {
-  const navigate = useNavigate();
-  const [locationError, setLocationError] = useState(null);
-  const [isLocationVerified, setIsLocationVerified] = useState(false);
-  const [isCheckingLocation, setIsCheckingLocation] = useState(true);
+  const [selectedMedication, setSelectedMedication] = useState(null);
 
   const handleMedicationClick = (medication) => {
-    navigate(`/medication-details?id=${medication?.id}`);
+    setSelectedMedication(medication);
   };
 
   const addToFavorites = (medicationId, e) => {
@@ -89,6 +85,7 @@ const SearchResults = ({ results, searchQuery, isLoading, hasMedications }) => {
   }
 
   return (
+    <>
     <div className="w-full max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -153,6 +150,13 @@ const SearchResults = ({ results, searchQuery, isLoading, hasMedications }) => {
         ))}
       </div>
     </div>
+    {selectedMedication && (
+      <MedicationModal
+        medication={selectedMedication}
+        onClose={() => setSelectedMedication(null)}
+      />
+    )}
+    </>
   );
 };
 

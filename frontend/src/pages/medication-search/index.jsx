@@ -28,7 +28,12 @@ const MedicationSearch = () => {
       concentration: med.Concentracion,
       dilution: med.Dilucion,
       incompatibilities: med.Incompatibilidades,
-      observations: med.Observaciones
+      observations: med.Observaciones,
+      administrationTime: med["Tiempo de administracion"],
+      dosageUnit: med["Unidad de dosificacion"],
+      stability: med["Estabilidad de la dilucion"],
+      lightProtection: med["Proteccion de la luz"],
+      warnings: med.Advertencias
     }));
     setMedications(transformedData);
   }, []);
